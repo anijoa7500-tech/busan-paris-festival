@@ -1,227 +1,257 @@
-import React, { useMemo, useState, useEffect } from "react";
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>글로컬크리에이터 하단팀</title>
 
-const seedResults = [
-  {
-    title: "[부산한정] NFC 비누비누 베이베 키링 · GLOCAL:HD",
-    url: "https://glocal-hd.com/product/...",
-    displayUrl: "glocal-hd.com/product/...r",
-    snippet:
-      "사하구 하단 문화의거리에서 열리는 프렌치 마르쉐 & 공연 축제입니다. 부산외국어대학교 글로컬 크리에이터 하단 팀이 함께하는 프로젝트로, 일정·프로그램·티켓·지도 정보를 한눈에 확인할 수 있습니다.",
-    rating: 4.9,
-    reviews: 1482,
-  },
-  {
-    title: "하단 숙박/체험 로컬 여행 상품 리스트 · 하단.음숙.다.대.허브",
-    url: "https://hadan-travelhub.co.kr",
-    displayUrl: "hadan.umsuk.daedae.heobeo",
-    snippet:
-      "부산 사하구 하단 문화의거리 기반의 로컬 여행 상품 추천 목록입니다. K-인싸 투어, 1일 비누 만들기, 로컬 맛집 등 다양한 테마별 액티비티와 숙박 정보를 제공합니다.",
-    rating: 4.6,
-    reviews: 524,
-  },
-  {
-    title: "부산 파리 마르쉐 · 공식 안내(일정·오시는 길)",
-    url: "https://busan-parisfest.kr",
-    displayUrl: "busan-parisfest.kr",
-    snippet:
-      "사하구 하단 문화의거리에서 열리는 프렌치 마르쉐 & 공연 축제입니다. 프랑스의 마르쉐와 카페 문화를 옮겨온 도시형 축제로, 디저트/치즈, 공연, 포토스팟을 즐길 수 있습니다. (일정: 2025. 12. 6(토) - 12. 7(일))",
-    rating: 4.7,
-    reviews: 861,
-  },
-  {
-    title: "하단 재즈 나잇 · 공연 라인업 및 타임테이블",
-    url: "https://hadanjazz.kr/lineup",
-    displayUrl: "hadanjazz.kr",
-    snippet:
-      "하단역 일대에서 열리는 도심형 재즈 축제입니다. 국내외 재즈 아티스트, 게스트 세션 정보와 공연 시간표를 미리 만나보세요.",
-    rating: 4.8,
-    reviews: 1023,
-  },
-  {
-    title: "다대포 선셋 포토워크 · 참가자 모집(하단 출발)",
-    url: "https://www.dadaepo-sunset.com/walk",
-    displayUrl: "dadaepo-sunset.com",
-    snippet:
-      "하단에서 출발해 다대포 해변 일몰 명소를 걷는 포토워크입니다. 촬영 포인트, 복장 가이드, 날씨 체크리스트를 참고해보세요.",
-    rating: 4.5,
-    reviews: 392,
-  },
-  {
-    title: "로컬 베이커리 위크 in 하단 · 참가 매장 안내",
-    url: "https://bakeryweek.kr/hadan",
-    displayUrl: "bakeryweek.kr",
-    snippet:
-      "하단의 개성 있는 로컬 베이커리 20여 곳이 참여합니다. 시그니처 메뉴, 빵 굽는 시간, 스탬프 위치와 한정 굿즈 정보를 제공합니다.",
-    rating: 4.6,
-    reviews: 745,
-  },
-];
+  <!-- Leaflet 지도 CSS -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
 
-export default function GoogleStyleSearchPreview() {
-  const [q, setQ] = useState("부산외국어대학교 글로컬크리에이터 하단");
-  const [submitted, setSubmitted] = useState("부산외국어대학교 글로컬크리에이터 하단");
+  <style>
+    body {
+      margin: 0;
+      background: #202124;
+      color: #e8eaed;
+      font-family: Arial, sans-serif;
+      overflow-y: scroll;
+    }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-  const results = useMemo(() => {
-    if (!submitted) return seedResults;
-    const k = submitted.trim().toLowerCase();
-    const tokens = k.split(" ").filter(Boolean);
-    const filtered = seedResults.filter((r) => {
-      if (tokens.length === 0) return true;
-      const title = r.title.toLowerCase();
-      const snip = r.snippet.toLowerCase();
-      return tokens.some((t) => title.includes(t) || snip.includes(t));
-    });
-    return filtered.length ? filtered : seedResults;
-  }, [submitted]);
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: #202124cc;
+      backdrop-filter: blur(8px);
+      padding: 16px;
+      border-bottom: 1px solid #ffffff20;
+    }
 
-  useEffect(() => {
-    const css = document.createElement("link");
-    css.rel = "stylesheet";
-    css.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
-    document.head.appendChild(css);
+    .search-box {
+      max-width: 950px;
+      margin: auto;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
 
-    const script = document.createElement("script");
-    script.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
-    script.async = true;
-    document.body.appendChild(script);
+    .search-input {
+      flex: 1;
+      background: #303134;
+      border-radius: 999px;
+      padding: 10px 16px;
+      border: 1px solid transparent;
+      color: #fff;
+      font-size: 14px;
+      outline: none;
+    }
 
-    script.onload = () => {
-      try {
-        const L = (window).L;
-        if (!L) return;
-        const el = document.getElementById("mapPreview");
-        if (!el) return;
+    .search-btn {
+      background: #8ab4f8;
+      border-radius: 999px;
+      padding: 10px 20px;
+      color: #202124;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: bold;
+    }
 
-        const map = L.map(el, { zoomControl: false }).setView([35.104, 128.966], 14);
-        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-          attribution: "&copy; OpenStreetMap contributors",
-        }).addTo(map);
-        L.marker([35.104, 128.966]).addTo(map).bindPopup("하단역").openPopup();
-      } catch (err) {
-        console.error("Leaflet init failed:", err);
-      }
-    };
+    .container {
+      max-width: 1100px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
 
-    return () => {
-      const el = document.getElementById("mapPreview");
-      if (el) el.replaceChildren();
-    };
-  }, []);
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: 20px;
+    }
 
-  return (
-    <div className="min-h-screen text-[#e8eaed] bg-[#202124] overflow-y-scroll no-scrollbar">
-      <header className="w-full border-b border-white/10 sticky top-0 z-40 bg-[#202124]/80 backdrop-blur">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-4">
-          <div className="text-2xl font-bold tracking-tight">
-            Goo<span className="text-[#8ab4f8]">gle</span>
-          </div>
-          <form
-            className="flex-1"
-            onSubmit={(e) => {
-              e.preventDefault();
-              setSubmitted(q);
-            }}
-          >
-            <div className="flex items-center gap-2 bg-[#303134] rounded-full pl-4 pr-2 py-2">
-              <span className="text-[#bdc1c6] text-sm">🔎</span>
-              <input
-                value={q}
-                onChange={(e) => setQ(e.target.value)}
-                placeholder="검색 또는 URL 입력"
-                className="flex-1 bg-transparent outline-none text-sm"
-              />
-              <button
-                type="submit"
-                className="px-4 py-1.5 bg-[#8ab4f8] text-[#202124] rounded-full text-sm font-semibold"
-              >
-                Google 검색
-              </button>
-            </div>
-          </form>
-        </div>
-      </header>
+    .card {
+      background: #303134;
+      border-radius: 20px;
+      border: 1px solid #ffffff15;
+      overflow: hidden;
+    }
 
-      <main className="max-w-7xl mx-auto px-4 pt-6 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_360px] gap-8">
-        <section className="col-span-full">
-          <div className="mb-3">
-            <h1 className="text-2xl md:text-[28px] font-semibold">
-              글로컬크리에어터 중단팀
-            </h1>
-            <div className="text-sm text-[#9aa0a6] mt-1">
-              부산광역시 금정구 금샘로 485번길 65
-            </div>
-          </div>
+    .card-section {
+      padding: 20px;
+    }
 
-          <div className="grid lg:grid-cols-[minmax(0,1fr)_360px] gap-4">
-            {/* 🔥 메인 이미지 (프록시 버전 적용) */}
-            <div className="relative rounded-2xl overflow-hidden border border-white/10 bg-[#303134]">
-              <img
-                src="https://images.weserv.nl/?url=postfiles.pstatic.net/MjAyNTExMTFfMTY1/MDAxNzYyODM0NjE3MTc1.1ap22VNgJtNmgu-dEu9jssTbYQo87gikRbcGLhYSCiUg.XiJpPPisKcO0rTuG5fN44BaDJlb07OrNTAibATpFZtkg.PNG/Gemini_Generated_Image_px7fb9px7fb9px7f.png?type=w580"
-                alt="자갈치시장 (부산)"
-                className="w-full h-[260px] md:h-[360px] object-cover"
-              />
-            </div>
+    .result-item {
+      border-bottom: 1px solid #ffffff20;
+      padding-bottom: 16px;
+    }
+  </style>
+</head>
+<body class="no-scrollbar">
 
-            <div className="grid gap-4">
-              <div className="rounded-2xl border border-white/10 bg-[#1f2023] h-[180px] relative">
-                <div id="mapPreview" className="absolute inset-0"></div>
-              </div>
+  <!-- HEADER -->
+  <header>
+    <div class="search-box">
+      <div style="font-size: 26px; font-weight: bold;">Goo<span style="color:#8ab4f8">gle</span></div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="rounded-2xl border border-white/10 bg-[#303134] p-4">
-                  <div className="text-sm text-[#9aa0a6] mb-2">날씨</div>
-                </div>
+      <input id="searchInput" class="search-input" placeholder="검색 또는 URL 입력">
 
-                {/* 🔥 작은 이미지(프록시 적용) */}
-                <div className="rounded-2xl border border-white/10 bg-[#303134] overflow-hidden">
-                  <img
-                    src="https://images.weserv.nl/?url=postfiles.pstatic.net/MjAyNTExMTFfMTY1/MDAxNzYyODM0NjE3MTc1.1ap22VNgJtNmgu-dEu9jssTbYQo87gikRbcGLhYSCiUg.XiJpPPisKcO0rTuG5fN44BaDJlb07OrNTAibATpFZtkg.PNG/Gemini_Generated_Image_px7fb9px7fb9px7f.png?type=w580"
-                    alt="부산광역시"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid lg:grid-cols-2 gap-4 mt-4">
-            <div className="rounded-2xl border border-white/10 bg-[#303134] p-4">
-              기본현황…
-            </div>
-
-            <div className="rounded-2xl border border-white/10 bg-[#303134] p-4">
-              지역지표…
-            </div>
-          </div>
-        </section>
-
-        <section>
-          {results.map((r, i) => (
-            <div key={i} className="border-b border-white/10 pb-4">
-              <div className="text-xs text-[#9aa0a6]">{r.displayUrl}</div>
-              <div className="text-lg text-[#8ab4f8]">{r.title}</div>
-            </div>
-          ))}
-        </section>
-
-        <aside className="hidden lg:block sticky top-[76px]">
-          <div className="rounded-2xl border border-white/10 bg-[#303134] overflow-hidden">
-            {/* 🔥 사이드 정사각형 이미지 (프록시 적용) */}
-            <img
-              src="https://images.weserv.nl/?url=postfiles.pstatic.net/MjAyNTExMTFfMzkg/MDAxNzYyODMzNTk1MTA1.Tgw94vuCud01GqJEllygmWJLI0DOuYCypY3EMvDfAckg.NjUIog0XiqSfIw0Ay0nEHSIolK5emHr9L4zjt6PtMaMg.PNG/rmfzm.png?type=w580"
-              alt="글로컬 크리에이터"
-              className="w-full aspect-square object-cover"
-            />
-          </div>
-        </aside>
-      </main>
+      <button onclick="onSearch()" class="search-btn">Google 검색</button>
     </div>
-  );
-}
+  </header>
 
-const style = document.createElement("style");
-style.innerHTML = `
-  .no-scrollbar::-webkit-scrollbar { display: none; }
-  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-`;
-document.head.appendChild(style);
+  <!-- MAIN -->
+  <div class="container">
+
+    <!-- 상단 제목 -->
+    <h1 style="font-size: 28px; margin-bottom: 4px;">글로컬크리에이터 중단팀</h1>
+    <div style="font-size: 13px; color:#9aa0a6">부산광역시 금정구 금샘로 485번길 65</div>
+
+    <div class="grid" style="margin-top:20px;">
+
+      <!-- LEFT -->
+      <section>
+
+        <!-- 메인 이미지 -->
+        <div class="card" style="margin-bottom:20px;">
+          <img src="https://images.weserv.nl/?url=postfiles.pstatic.net/MjAyNTExMTFfMTY1/MDAxNzYyODM0NjE3MTc1.1ap22VNgJtNmgu-dEu9jssTbYQo87gikRbcGLhYSCiUg.XiJpPPisKcO0rTuG5fN44BaDJlb07OrNTAibATpFZtkg.PNG/Gemini_Generated_Image_px7fb9px7fb9px7f.png?type=w580"
+               style="width:100%; height:340px; object-fit:cover;">
+        </div>
+
+        <!-- 지도 -->
+        <div class="card" style="margin-bottom:20px; height:200px; position:relative;">
+          <div id="map" style="width:100%; height:100%;"></div>
+        </div>
+
+        <!-- 기본 현황 -->
+        <div class="card" style="margin-bottom:20px;">
+          <div class="card-section">
+            <h3 style="margin-top:0">기본현황</h3>
+            부산 하단동이 단순히 경유지가 아닌, 외국인 관광객이 '머물고, 소비하고 싶은'
+            목적지가 되기 위한 글로컬 크리에이터의 핵심 전략은 하단이 가진 독특한 자원을
+            '환승 시간'에 맞춘 매력적인 체험으로 바꾸는 것입니다.
+          </div>
+        </div>
+
+        <!-- 핵심지표 -->
+        <div class="card">
+          <div class="card-section">
+            <h3 style="margin-top:0;">하단 지역 핵심지표</h3>
+
+            <p><b>주요 자원:</b> 을숙도, 동아대, 낙동강하구둑 (3大 랜드마크)</p>
+            <p><b>콘텐츠 접근성:</b> 부산 유일의 '강-바다' 접점 더블 역세권</p>
+            <p><b>잠재력:</b> 글로벌 로컬 콘텐츠 테스트베드(Testbed)</p>
+
+          </div>
+        </div>
+
+      </section>
+
+      <!-- RIGHT -->
+      <aside class="card">
+        <img
+          src="https://images.weserv.nl/?url=postfiles.pstatic.net/MjAyNTExMTFfMzkg/MDAxNzYyODMzNTk1MTA1.Tgw94vuCud01GqJEllygmWJLI0DOuYCypY3EMvDfAckg.NjUIog0XiqSfIw0Ay0nEHSIolK5emHr9L4zjt6PtMaMg.PNG/rmfzm.png?type=w580"
+          style="width:100%; object-fit:cover;"
+        >
+        <div class="card-section">
+          <div style="color:#9aa0a6; font-size:12px;">이름</div>
+          <div style="font-size:16px; font-weight:bold; margin-bottom:6px;">글로컬 크리에이터</div>
+          <a href="#" style="color:#8ab4f8; font-size:13px;">부산외국어대학교 : 박광우 교수</a>
+        </div>
+      </aside>
+
+    </div>
+
+    <!-- 검색 결과 -->
+    <div style="margin-top:40px;">
+      <h3>검색 결과</h3>
+      <div id="resultBox"></div>
+    </div>
+
+  </div>
+
+  <!-- Leaflet 지도 JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <script>
+    /* -----------------------------
+       지도 로딩
+    ------------------------------ */
+    var map = L.map('map').setView([35.104, 128.966], 14);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: "&copy; OpenStreetMap"
+    }).addTo(map);
+    L.marker([35.104, 128.966]).addTo(map).bindPopup("하단역");
+
+    /* -----------------------------
+       검색 데이터
+    ------------------------------ */
+    const seedResults = [
+      {
+        title: "[부산한정] NFC 비누비누 베이베 키링 · GLOCAL:HD",
+        url: "https://glocal-hd.com/product/...",
+        displayUrl: "glocal-hd.com/product/...r",
+        snippet:
+          "사하구 하단 문화의거리에서 열리는 프렌치 마르쉐 & 공연 축제입니다...",
+        rating: 4.9,
+        reviews: 1482
+      },
+      {
+        title: "하단 숙박/체험 로컬 여행 상품 리스트 · 하단.음숙.다.대.허브",
+        url: "https://hadan-travelhub.co.kr",
+        displayUrl: "hadan.umsuk.daedae.heobeo",
+        snippet:
+          "부산 사하구 하단 문화의거리 기반의 로컬 여행 상품 추천 목록입니다...",
+        rating: 4.6,
+        reviews: 524
+      },
+      {
+        title: "부산 파리 마르쉐 · 공식 안내(일정·오시는 길)",
+        url: "https://busan-parisfest.kr",
+        displayUrl: "busan-parisfest.kr",
+        snippet:
+          "프랑스의 마르쉐와 카페 문화를 옮겨온 도시형 축제로...",
+        rating: 4.7,
+        reviews: 861
+      }
+    ];
+
+    /* -----------------------------
+       검색 기능
+    ------------------------------ */
+    function onSearch() {
+      const q = document.getElementById("searchInput").value.trim().toLowerCase();
+      const box = document.getElementById("resultBox");
+
+      const result = seedResults.filter(r =>
+        r.title.toLowerCase().includes(q) ||
+        r.snippet.toLowerCase().includes(q)
+      );
+
+      let html = "";
+
+      result.forEach(r => {
+        html += `
+          <div class="result-item">
+            <div style="font-size:12px; color:#9aa0a6;">${r.displayUrl}</div>
+            <a href="${r.url}" target="_blank" style="color:#8ab4f8; font-size:18px; text-decoration:none;">
+              ${r.title}
+            </a>
+            <div style="margin-top:2px; font-size:14px;">
+              ★ ${r.rating}  <span style="color:#9aa0a6;">(${r.reviews}건의 리뷰)</span>
+            </div>
+            <div style="margin-top:6px; color:#bdc1c6;">${r.snippet}</div>
+          </div>
+        `;
+      });
+
+      box.innerHTML = html;
+    }
+  </script>
+
+</body>
+</html>
