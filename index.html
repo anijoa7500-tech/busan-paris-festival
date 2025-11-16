@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Hadan Search</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- React & ReactDOM CDN -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+
+    <!-- Babel (JSX 변환기) -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Leaflet 지도 CSS -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+  </head>
+
+  <body class="bg-black">
+
+    <div id="root"></div>
+
+    <!-- React 코드 -->
+    <script type="text/babel">
+
+      function App() {
+        return (
+          <div class="text-white p-6 text-center">
+            <h1 class="text-3xl font-bold">하단 검색 페이지 준비중…</h1>
+            <p class="opacity-60 mt-2">이제 바로 React로 만들 수 있어!</p>
+          </div>
+        );
+      }
+
+      ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+    </script>
+
+  </body>
+</html>
