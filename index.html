@@ -3,100 +3,385 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>부산 하단 - 추천 리스트</title>
+  <title>Google 스타일 검색 미리보기</title>
+
+  <!-- Leaflet CSS -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
+
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #eef1f7;
       margin: 0;
-      padding: 0;
+      background: #202124;
+      color: #e8eaed;
+      font-family: Arial, sans-serif;
+      overflow-x: hidden;
     }
 
-    header {
-      background: #1e3a8a;
-      color: white;
-      padding: 24px;
-      text-align: center;
-      font-size: 26px;
-      font-weight: bold;
-      letter-spacing: -0.5px;
+    .header {
+      width: 100%;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background: rgba(32, 33, 36, 0.9);
+      backdrop-filter: blur(8px);
+      padding: 14px 0;
     }
 
-    .list {
-      max-width: 800px;
-      margin: 30px auto;
-      padding: 0 20px;
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 16px;
     }
 
-    .item {
-      background: #ffffff;
-      border-radius: 18px;
-      padding: 22px;
-      margin-bottom: 18px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.12);
-      transition: transform 0.13s ease, box-shadow 0.13s ease;
+    .search-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #303134;
+      border-radius: 40px;
+      padding: 8px 14px;
+      border: 1px solid transparent;
     }
 
-    .item:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 6px 12px rgba(0,0,0,0.18);
+    .search-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #fff;
+      font-size: 14px;
     }
 
-    .item h3 {
-      margin: 0 0 10px 0;
-      font-size: 20px;
-      color: #111827;
-    }
-
-    .item p {
-      margin: 5px 0;
-      color: #374151;
-      font-size: 15px;
-    }
-
-    footer {
-      margin-top: 40px;
-      text-align: center;
-      padding: 20px;
+    .search-btn {
+      background: #8ab4f8;
+      border: none;
+      padding: 8px 16px;
+      color: #202124;
+      border-radius: 999px;
       font-size: 13px;
-      color: #555;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    /* map */
+    #mapPreview {
+      width: 100%;
+      height: 180px;
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    .panel {
+      background: #303134;
+      border: 1px solid rgba(255,255,255,0.1);
+      padding: 16px;
+      border-radius: 14px;
+    }
+
+    .result-title {
+      color: #8ab4f8;
+      font-size: 20px;
+      line-height: 1.3;
+      cursor: pointer;
+    }
+
+    .result-title:hover {
+      text-decoration: underline;
+    }
+
+    .result-snippet {
+      color: #bdc1c6;
+      line-height: 1.5;
+      margin-top: 4px;
+    }
+
+    .result-url {
+      color: #9aa0a6;
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+
+    .aside-img {
+      width: 100%;
+      border-radius: 14px;
+      aspect-ratio: 1/1;
+      object-fit: cover;
+    }
+
+    /* hide scrollbar */
+    .no-scroll::-webkit-scrollbar {
+      display: none;
     }
   </style>
 </head>
 
-<body>
+<body class="no-scroll">
 
-  <header>🌟 부산 하단 추천 리스트</header>
+  <!-- HEADER -->
+  <header class="header">
+    <div class="container" style="display:flex;align-items:center;gap:16px;">
+      <div style="font-size:24px;font-weight:bold;">
+        Goo<span style="color:#8ab4f8">gle</span>
+      </div>
 
-  <div class="list">
-
-    <div class="item">
-      <h3>[K-인싸 바이브 챌린지] 동아대 새내기 룩 & 미션 투어</h3>
-      <p>가격: 59,000원~</p>
-      <p>하단 대학가 문화 + 숏폼 미션 인기 코스!</p>
+      <form id="searchForm" style="flex:1;">
+        <div class="search-bar">
+          <span style="font-size:14px;color:#bdc1c6;">🔎</span>
+          <input
+            id="searchInput"
+            class="search-input"
+            type="text"
+            placeholder="검색 또는 URL 입력"
+            value="부산외국어대학교 글로컬크리에이터 하단"
+          />
+          <button class="search-btn" type="submit">Google 검색</button>
+        </div>
+      </form>
     </div>
+  </header>
 
-    <div class="item">
-      <h3>1일 비누 크리에이터 체험</h3>
-      <p>가격: 39,000원~</p>
-      <p>을숙도 자연 향기 입힌 K-Soap 제작 체험</p>
-    </div>
+  <!-- BODY -->
+  <main class="container" style="padding-top:24px;display:grid;grid-template-columns:1fr 360px;gap:24px;">
+    
+    <!-- LEFT CONTENT -->
+    <section id="mainSection" style="grid-column:1 / 3;">
 
-    <div class="item">
-      <h3>송도 해수욕장 & 아쿠아리움</h3>
-      <p>가격: 69,000원~</p>
-      <p>케이블카 + 스카이워크 + 아쿠아리움 완전체</p>
-    </div>
+      <h1 style="font-size:28px;font-weight:bold;margin-bottom:4px;">
+        글로컬크리에이터 중단팀
+      </h1>
+      <div style="font-size:13px;color:#9aa0a6;margin-bottom:16px;">
+        부산광역시 금정구 금샘로 485번길 65
+      </div>
 
-    <div class="item">
-      <h3>하단 노을 골든아워 포토 투어</h3>
-      <p>가격: 19,000원~</p>
-      <p>하단 감성 카페 + 낙동강 노을 사진 성지</p>
-    </div>
+      <div style="display:grid;grid-template-columns:1fr 360px;gap:16px;">
+        
+        <!-- LEFT large img -->
+        <div style="border-radius:20px;overflow:hidden;border:1px solid rgba(255,255,255,0.1);">
+          <img
+            src="https://postfiles.pstatic.net/MjAyNTExMTFfMTY1/MDAxNzYyODM0NjE3MTc1.1ap22VNgJtNmgu-dEu9jssTbYQo87gikRbcGLhYSCiUg.XiJpPPisKcO0rTuG5fN44BaDJlb07OrNTAibATpFZtkg.PNG/Gemini_Generated_Image_px7fb9px7fb9px7f.png?type=w580"
+            style="width:100%;height:360px;object-fit:cover;"
+          />
+        </div>
 
-  </div>
+        <!-- RIGHT info -->
+        <div style="display:flex;flex-direction:column;gap:16px;">
 
-  <footer>© 2025 부산 하단 추천 페이지</footer>
+          <div class="panel" style="height:180px;position:relative;">
+            <div id="mapPreview"></div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+            
+            <!-- 날씨 -->
+            <div class="panel">
+              <div style="color:#9aa0a6;font-size:14px;margin-bottom:8px;">날씨</div>
+              <div style="display:flex;justify-content:space-between;">
+                <div style="text-align:center;">
+                  <div style="font-size:12px;color:#9aa0a6;">화</div>
+                  <div>☀️ 17°</div>
+                </div>
+                <div style="text-align:center;">
+                  <div style="font-size:12px;color:#9aa0a6;">수</div>
+                  <div>☀️ 19°</div>
+                </div>
+                <div style="text-align:center;">
+                  <div style="font-size:12px;color:#9aa0a6;">목</div>
+                  <div>☀️ 19°</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 부산 이미지 -->
+            <div class="panel" style="padding:0;">
+              <img
+                src="https://www.busan.com/nas/data/content/image/2015/02/16/20150216000102_0.jpg"
+                style="width:100%;height:100%;object-fit:cover;border-radius:14px;"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 지역정보 -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px;">
+        
+        <div class="panel">
+          <div style="font-weight:bold;margin-bottom:8px;">기본현황</div>
+          부산 하단동이 단순히 경유지가 아닌, 외국인 관광객이 '머물고, 소비하고 싶은' 목적지가 되기 위한 글로컬 크리에이터의 핵심 전략은 하단이 가진 독특한 자원을 '환승 시간'에 맞춘 매력적인 체험으로 바꾸는 것입니다.
+        </div>
+
+        <div class="panel">
+          <div style="font-weight:bold;margin-bottom:8px;">하단 지역 핵심지표</div>
+          <div style="display:grid;grid-template-columns:110px auto;gap:6px;font-size:14px;">
+            <div style="color:#9aa0a6;">주요 자원</div><div>을숙도, 동아대, 낙동강하구둑 (3大 랜드마크)</div>
+            <div style="color:#9aa0a6;">콘텐츠 접근성</div><div>부산 유일의 '강-바다' 접점 더블 역세권</div>
+            <div style="color:#9aa0a6;">잠재력</div><div>글로벌 로컬 콘텐츠 테스트베드(Testbed)</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT SIDE IMAGE + INFO -->
+    <aside style="position:sticky;top:80px;height:fit-content;">
+      <div class="panel" style="padding:0;">
+        <img
+          class="aside-img"
+          src="https://postfiles.pstatic.net/MjAyNTExMTFfMzkg/MDAxNzYyODMzNTk1MTA1.Tgw94vuCud01GqJEllygmWJLI0DOuYCypY3EMvDfAckg.NjUIog0XiqSfIw0Ay0nEHSIolK5emHr9L4zjt6PtMaMg.PNG/rmfzm.png?type=w580"
+        />
+        <div style="padding:14px;">
+          <div style="font-size:13px;color:#9aa0a6;margin-bottom:4px;">이름</div>
+          <div style="font-size:15px;font-weight:bold;">글로컬 크리에이터</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- SEARCH RESULTS -->
+    <section id="resultsSection" style="grid-column:1 / 2;margin-top:20px;">
+      <p id="resultCount" style="color:#9aa0a6;font-size:13px;margin-bottom:12px;"></p>
+      <ul id="resultsList" style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:24px;"></ul>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="container" style="color:#9aa0a6;font-size:12px;padding:20px 0;margin-top:40px;">
+    대한민국 · 부산 · 하단 · 학습용 실습 UI 클론
+  </footer>
+
+  <!-- Leaflet Script -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- SEARCH LOGIC JS -->
+  <script>
+    const seedResults = [
+      {
+        title: "[부산한정] NFC 비누비누 베이베 키링 · GLOCAL:HD",
+        url: "https://glocal-hd.com/product/...",
+        displayUrl: "glocal-hd.com/product/...r",
+        snippet:
+          "사하구 하단 문화의거리에서 열리는 프렌치 마르쉐 & 공연 축제입니다.",
+        rating: 4.9,
+        reviews: 1482,
+      },
+      {
+        title: "하단 숙박/체험 로컬 여행 상품 리스트 · 하단.음숙.다.대.허브",
+        url: "https://hadan-travelhub.co.kr",
+        displayUrl: "hadan.umsuk.daedae.heobeo",
+        snippet:
+          "부산 사하구 하단 문화의거리 기반의 로컬 여행 상품 추천 목록입니다.",
+        rating: 4.6,
+        reviews: 524,
+      },
+      {
+        title: "부산 파리 마르쉐 · 공식 안내(일정·오시는 길)",
+        url: "https://busan-parisfest.kr",
+        displayUrl: "busan-parisfest.kr",
+        snippet:
+          "프렌치 마르쉐 & 공연 축제가 열립니다. 일정·티켓·프로그램 안내.",
+        rating: 4.7,
+        reviews: 861,
+      },
+      {
+        title: "하단 재즈 나잇 · 공연 라인업 및 타임테이블",
+        url: "https://hadanjazz.kr/lineup",
+        displayUrl: "hadanjazz.kr",
+        snippet:
+          "도심형 재즈 축제 라인업, 공연 시간 정보를 제공합니다.",
+        rating: 4.8,
+        reviews: 1023,
+      },
+      {
+        title: "다대포 선셋 포토워크 · 참가자 모집(하단 출발)",
+        url: "https://www.dadaepo-sunset.com/walk",
+        displayUrl: "dadaepo-sunset.com",
+        snippet:
+          "다대포 일몰 명소를 걷는 포토워크 일정 및 촬영 포인트 안내.",
+        rating: 4.5,
+        reviews: 392,
+      },
+      {
+        title: "로컬 베이커리 위크 in 하단 · 참가 매장 안내",
+        url: "https://bakeryweek.kr/hadan",
+        displayUrl: "bakeryweek.kr",
+        snippet:
+          "하단의 로컬 베이커리 20여 곳 참여. 스탬프, 메뉴, 한정 굿즈 안내.",
+        rating: 4.6,
+        reviews: 745,
+      }
+    ];
+
+    // Search
+    function renderResults(keyword) {
+      const tokens = keyword
+        .trim()
+        .toLowerCase()
+        .split(" ")
+        .filter(Boolean);
+
+      let filtered = seedResults.filter((r) => {
+        if (tokens.length === 0) return true;
+        const t = r.title.toLowerCase();
+        const s = r.snippet.toLowerCase();
+        return tokens.some((k) => t.includes(k) || s.includes(k));
+      });
+
+      if (!filtered.length) filtered = seedResults;
+
+      document.getElementById("resultCount").textContent = `약 ${filtered.length}개 결과`;
+
+      const list = document.getElementById("resultsList");
+      list.innerHTML = "";
+
+      filtered.forEach((r) => {
+        const li = document.createElement("li");
+        li.innerHTML = `
+          <div class="result-url">${r.displayUrl}</div>
+          <div class="result-title" onclick="window.open('${r.url}', '_blank')">
+            ${r.title}
+          </div>
+          <div style="margin-top:4px;font-size:14px;">
+            ★ ${r.rating} 
+            <span style="color:#9aa0a6;">(${r.reviews.toLocaleString()}건)</span>
+          </div>
+          <div class="result-snippet">${r.snippet}</div>
+        `;
+        list.appendChild(li);
+      });
+    }
+
+    // Map
+    function initMap() {
+      const map = L.map("mapPreview", { zoomControl: false }).setView(
+        [35.104, 128.966],
+        14
+      );
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "&copy; OpenStreetMap contributors",
+      }).addTo(map);
+
+      L.marker([35.104, 128.966])
+        .addTo(map)
+        .bindPopup("하단역")
+        .openPopup();
+    }
+
+    // Submit
+    document.getElementById("searchForm").onsubmit = function (e) {
+      e.preventDefault();
+      const v = document.getElementById("searchInput").value;
+      renderResults(v);
+    };
+
+    // On load
+    window.onload = function () {
+      initMap();
+      renderResults("부산외국어대학교 글로컬크리에이터 하단");
+    };
+  </script>
 
 </body>
 </html>
