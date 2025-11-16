@@ -1,44 +1,102 @@
 <!DOCTYPE html>
 <html lang="ko">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Hadan Search</title>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>부산 하단 - 추천 리스트</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #eef1f7;
+      margin: 0;
+      padding: 0;
+    }
 
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    header {
+      background: #1e3a8a;
+      color: white;
+      padding: 24px;
+      text-align: center;
+      font-size: 26px;
+      font-weight: bold;
+      letter-spacing: -0.5px;
+    }
 
-    <!-- React & ReactDOM CDN -->
-    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    .list {
+      max-width: 800px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
 
-    <!-- Babel (JSX 변환기) -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    .item {
+      background: #ffffff;
+      border-radius: 18px;
+      padding: 22px;
+      margin-bottom: 18px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.12);
+      transition: transform 0.13s ease, box-shadow 0.13s ease;
+    }
 
-    <!-- Leaflet 지도 CSS -->
-    <link
-      rel="stylesheet"
-      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    />
-  </head>
+    .item:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.18);
+    }
 
-  <body class="bg-black">
+    .item h3 {
+      margin: 0 0 10px 0;
+      font-size: 20px;
+      color: #111827;
+    }
 
-    <div id="root"></div>
+    .item p {
+      margin: 5px 0;
+      color: #374151;
+      font-size: 15px;
+    }
 
-    <!-- React 코드 -->
-    <script type="text/babel">
+    footer {
+      margin-top: 40px;
+      text-align: center;
+      padding: 20px;
+      font-size: 13px;
+      color: #555;
+    }
+  </style>
+</head>
 
-      function App() {
-        return (
-          <div class="text-white p-6 text-center">
-            <h1 class="text-3xl font-bold">하단 검색 페이지 준비중…</h1>
-            <p class="opacity-60 mt-2">이제 바로 React로 만들 수 있어!</p>
-          </div>
-        );
-      }
+<body>
 
-      ReactDOM.createRoot(document.getElementById("root")).render(<App />);
-    </script>
+  <header>🌟 부산 하단 추천 리스트</header>
 
-  </body>
+  <div class="list">
+
+    <div class="item">
+      <h3>[K-인싸 바이브 챌린지] 동아대 새내기 룩 & 미션 투어</h3>
+      <p>가격: 59,000원~</p>
+      <p>하단 대학가 문화 + 숏폼 미션 인기 코스!</p>
+    </div>
+
+    <div class="item">
+      <h3>1일 비누 크리에이터 체험</h3>
+      <p>가격: 39,000원~</p>
+      <p>을숙도 자연 향기 입힌 K-Soap 제작 체험</p>
+    </div>
+
+    <div class="item">
+      <h3>송도 해수욕장 & 아쿠아리움</h3>
+      <p>가격: 69,000원~</p>
+      <p>케이블카 + 스카이워크 + 아쿠아리움 완전체</p>
+    </div>
+
+    <div class="item">
+      <h3>하단 노을 골든아워 포토 투어</h3>
+      <p>가격: 19,000원~</p>
+      <p>하단 감성 카페 + 낙동강 노을 사진 성지</p>
+    </div>
+
+  </div>
+
+  <footer>© 2025 부산 하단 추천 페이지</footer>
+
+</body>
 </html>
