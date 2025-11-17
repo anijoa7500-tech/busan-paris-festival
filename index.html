@@ -195,7 +195,7 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    // Leaflet 아이콘 경로 명시적 설정 (404 오류 해결)
+    // Leaflet 아이콘 경로 명시적 설정
     if (window.L && L.Icon && L.Icon.Default) {
         L.Icon.Default.mergeOptions({
             iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
@@ -234,15 +234,19 @@
 
     let mapInstance = null;
     let mapInitialized = false;
+    let mapContainerObserver = null;
 
-    /**
-     * 지도 초기화 함수: Leaflet의 크기 계산 오류를 방지하기 위한 안정화 로직 포함
-     */
+    function forceMapInvalidate() {
+        if (mapInstance && mapInitialized) {
+            mapInstance.invalidateSize(true);
+        }
+    }
+
     function initializeMap() {
         const L = window.L;
         const el = document.getElementById("mapPreview");
         
-        // 1. 필요한 라이브러리/요소 검사 및 중복 초기화 방지
+        // 초기화 방지: Leaflet 라이브러리/컨테이너 없음 or 이미 초기화됨
         if (!L || !el || mapInitialized) {
             return;
         }
@@ -255,40 +259,57 @@
                 mapInstance = null;
             }
 
-            // 2. 지도 초기화 (하단역 근처 좌표 및 확대 레벨 조정)
+            // 1. 지도 초기화 (하단역 근처 좌표)
             mapInstance = L.map(el, { 
                 zoomControl: false, 
                 scrollWheelZoom: false 
-            }).setView([35.104, 128.966], 15); // 줌 레벨을 15로 조정하여 좀 더 확대
+            }).setView([35.104, 128.966], 15);
 
-            // 3. CartoDB Positron 타일셋 적용 (회색 톤 스타일)
+            // 2. 타일셋 적용 (회색 톤 스타일)
             L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
                 attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery &copy; <a href="https://carto.com/attributions">CARTO</a>',
                 subdomains: 'abcd',
                 maxZoom: 20
             }).addTo(mapInstance);
             
-            // 4. 마커 추가
+            // 3. 마커 추가
             L.marker([35.104, 128.966]).addTo(mapInstance).bindPopup("하단역").openPopup();
             
-            // 5. ⭐️ 핵심 안정화 로직: DOM 렌더링 후 크기 재계산 (가장 중요) ⭐️
+            
+            // 4. ⭐️ 최종 안정화 로직: MutationObserver 및 지연 호출 ⭐️
+            
+            // a) 최초 로드 시 1차 및 2차 지연 호출 (최대 1초 대기)
             mapInstance.whenReady(function() {
-                // 초기 로드 시 한 번 호출
                 this.invalidateSize(true); 
 
-                // DOM이 완전히 안정화되도록 200ms 후 다시 호출 
-                // 이 지연이 없으면 지도 크기가 잘못 계산되어 깨질 수 있습니다.
-                setTimeout(() => {
-                    this.invalidateSize(true); 
-                }, 200);
-                
-                // 윈도우 크기 변경 시에도 크기 재계산
-                window.addEventListener('resize', () => {
-                    if (mapInstance) {
-                        mapInstance.invalidateSize(false);
+                // 500ms 후 다시 호출 (브라우저가 레이아웃 계산을 마칠 때까지 대기)
+                setTimeout(forceMapInvalidate, 500); 
+
+                // 혹시 모를 상황에 대비해 1초 후 최종 확인
+                setTimeout(forceMapInvalidate, 1000); 
+            });
+
+            // b) MutationObserver를 사용하여 부모 DOM 구조 변화 감지 (Tailwind 클래스 적용 시 대응)
+            mapContainerObserver = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    // 속성 변화(클래스/스타일) 또는 자식 리스트 변화가 있을 때 재계산
+                    if (mutation.type === 'attributes' || mutation.type === 'childList') {
+                        forceMapInvalidate();
                     }
                 });
             });
+
+            const parentElement = el.parentElement;
+            if (parentElement) {
+                mapContainerObserver.observe(parentElement, { 
+                    attributes: true, 
+                    childList: true, 
+                    subtree: true 
+                });
+            }
+            
+            // c) 윈도우 크기 변경 시에도 크기 재계산
+            window.addEventListener('resize', forceMapInvalidate);
 
         } catch (err) {
             console.error("Leaflet map initialization failed:", err);
@@ -296,7 +317,7 @@
         }
     }
 
-    // 초기화 시점을 DOMContentLoaded로 설정
+    // 초기화 함수 실행 시점
     document.addEventListener('DOMContentLoaded', () => {
         renderResults(seedResults);
         initializeMap();
@@ -304,6 +325,14 @@
     
     // 안전을 위해 window load 시점에도 다시 시도
     window.addEventListener('load', initializeMap);
+    
+    // 페이지를 떠날 때 Observer 정리
+    window.addEventListener('beforeunload', () => {
+        if (mapContainerObserver) {
+            mapContainerObserver.disconnect();
+        }
+    });
+
 </script>
 
 </body>
