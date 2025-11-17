@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect, useRef } from "react";
 
-// (seedResults는 변화 없음)
+// (seedResults는 그대로 유지)
 const seedResults = [
   {
     title: "[부산한정] NFC 비누비누 베이베 키링 · GLOCAL:HD",
@@ -63,15 +63,12 @@ export default function GoogleStyleSearchPreview() {
   const [q, setQ] = useState("부산외국어대학교 글로컬크리에이터 하단");
   const [submitted, setSubmitted] = useState("부산외국어대학교 글로컬크리에이터 하단");
   
-  // ⭐️ 1. Leaflet 로드 상태를 관리합니다.
   const [isLeafletLoaded, setIsLeafletLoaded] = useState(false);
   
-  // Ref와 지도 인스턴스 관리
   const mapElementRef = useRef(null);
   const mapInstanceRef = useRef(null); 
 
   const results = useMemo(() => {
-    // (검색 결과 필터링 로직은 그대로 유지)
     if (!submitted) return seedResults;
     const k = submitted.trim().toLowerCase();
     const tokens = k.split(' ').filter(Boolean);
@@ -84,24 +81,43 @@ export default function GoogleStyleSearchPreview() {
     return filtered.length ? filtered : seedResults;
   }, [submitted]);
 
-  // ⭐️ 2. Leaflet 스크립트 로드 및 상태 변경 로직 (한 번만 실행)
+  // Leaflet 스크립트 로드 및 상태 변경 로직
   useEffect(() => {
-    // ⭐️ Leaflet CSS는 <style> 블록 대신 이곳에서 동적으로 로드합니다.
+    const L = (window as any).L;
+    
+    // CSS 로드
     const css = document.createElement("link");
     css.rel = "stylesheet";
     css.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
     document.head.appendChild(css);
 
-    if ((window as any).L) {
+    // ⭐️ Leaflet이 이미 로드되어 있다면 바로 상태 변경 후 종료
+    if (L) {
+        // ⭐️ 중요: 라이브러리가 로드되어 있으면 아이콘 경로를 확실히 선언합니다.
+        L.Icon.Default.mergeOptions({
+            iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+            iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+            shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png'
+        });
         setIsLeafletLoaded(true);
         return () => { css.remove(); }
     }
     
+    // 스크립트 로드
     const script = document.createElement("script");
     script.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
     script.async = true;
     
     script.onload = () => {
+        const L_onload = (window as any).L;
+        if (L_onload) {
+            // ⭐️ 중요: 스크립트 로드 직후에도 아이콘 경로를 확실히 선언합니다.
+            L_onload.Icon.Default.mergeOptions({
+                iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+                iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+                shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png'
+            });
+        }
         setIsLeafletLoaded(true); // 로드 완료 시 상태 변경
     }
     
@@ -114,29 +130,21 @@ export default function GoogleStyleSearchPreview() {
     }
   }, []);
 
-  // ⭐️ 3. 지도 초기화 로직 (Leaflet이 로드되고 DOM이 준비되었을 때만 실행)
+  // 지도 초기화 로직 (Leaflet이 로드되고 DOM이 준비되었을 때만 실행)
   useEffect(() => {
-    // ⭐️ 3-1. Leaflet이 로드되었는지, DOM 엘리먼트가 준비되었는지 확인
     if (!isLeafletLoaded || !mapElementRef.current) return;
     
     const L = (window as any).L;
     const el = mapElementRef.current;
     
-    // 이전 지도 인스턴스 제거 (클린업 로직)
+    // 이전 지도 인스턴스 제거
     if (mapInstanceRef.current) {
         mapInstanceRef.current.remove();
         mapInstanceRef.current = null;
     }
 
     try {
-        // Leaflet Icon 경로 설정 (404 오류 방지)
-        L.Icon.Default.mergeOptions({
-            iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-            iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-            shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png'
-        });
-
-        // 3-2. 지도 초기화
+        // ⭐️ 지도 초기화
         const map = L.map(el, { 
             zoomControl: false, 
             scrollWheelZoom: false 
@@ -150,8 +158,12 @@ export default function GoogleStyleSearchPreview() {
 
         mapInstanceRef.current = map;
 
-        
-        // ⭐️ 3-3. ResizeObserver를 사용하여 크기 변화 감지 (가장 안정적인 해결책)
+        // ⭐️ 중요: 지도 초기화 직후 즉시 크기 재계산 (지연 시간 0ms)
+        // DOM이 크기를 읽을 준비가 되었을 때 바로 실행됩니다.
+        map.invalidateSize(true);
+
+
+        // ResizeObserver를 사용하여 크기 변화 감지 (컴퓨터/모바일 화면 전환 대비)
         const observer = new ResizeObserver(() => {
             if (mapInstanceRef.current) {
                 mapInstanceRef.current.invalidateSize(true);
@@ -160,15 +172,7 @@ export default function GoogleStyleSearchPreview() {
 
         observer.observe(el);
 
-        // 3-4. 초기화 직후 한 번 강제 재계산 (최초 렌더링 시 크기 확정)
-        setTimeout(() => {
-            if (mapInstanceRef.current) {
-                mapInstanceRef.current.invalidateSize(true);
-            }
-        }, 0);
-
-
-        // 3-5. 클린업 로직 반환
+        // 클린업 로직 반환
         return () => {
             observer.unobserve(el);
             if (mapInstanceRef.current) {
@@ -182,12 +186,11 @@ export default function GoogleStyleSearchPreview() {
     }
     
     return () => {};
-  }, [isLeafletLoaded]); // Leaflet 로드 상태에만 의존합니다.
+  }, [isLeafletLoaded]); 
 
 
   return (
     <div className="min-h-screen text-[#e8eaed] bg-[#202124] overflow-y-scroll no-scrollbar">
-      {/* ... (Header 부분 생략) ... */}
       <header className="w-full border-b border-white/10 sticky top-0 z-40 bg-[#202124]/80 backdrop-blur">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-4">
           <div className="text-2xl font-bold tracking-tight">Goo<span className="text-[#8ab4f8]">gle</span></div>
@@ -218,11 +221,9 @@ export default function GoogleStyleSearchPreview() {
           </form>
         </div>
       </header>
-      {/* ... (Header Navigation 생략) ... */}
 
       <main className="max-w-7xl mx-auto px-4 pt-6 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_360px] gap-8">
         <section className="col-span-full">
-          {/* ... (제목 및 이미지 섹션 생략) ... */}
           <div className="mb-3">
             <h1 className="text-2xl md:text-[28px] font-semibold tracking-tight text-[#e8eaed]">글로컬크리에어터 중단팀</h1>
             <div className="text-sm text-[#9aa0a6] mt-1">부산광역시 금정구 금샘로 485번길 65</div>
@@ -230,7 +231,7 @@ export default function GoogleStyleSearchPreview() {
 
           <div className="grid lg:grid-cols-[minmax(0,1fr)_360px] gap-4">
             <div className="relative rounded-2xl overflow-hidden border border-white/10 bg-[#303134]">
-              <img referrerPolicy="no-referrer" src="https://postfiles.pstatic.net/MjAyNTExMTFfMTY1/MDAxNzYyODM0NjE3MTc1.1ap22VNgJtNmgu-dEu9jssTbYQo87gikRbcGLhYSCiUg.XiJpPPisKcO0rTuG5fN44BaDJlb07OrNTAibATpFZtkg.PNG/Gemini_Generated_Image_px7fb9px7fb9px7f.png?type=w580" alt="자갈치시장 (부산)" className="w-full h-[260px] md:h-[360px] object-cover" />
+              <img referrerPolicy="no-referrer" src="https://postfiles.pstatic.net/MjAyNTExMTFfMTY1/MDAxNzYyODM0NjE3MTc1.1ap22VNgJtNmgu-dEu9jssTbYQo87gikRbcGLhYSCiUg.XiJpPPisKcO0rTuG5fN44BaDJlb07OrTTAibATpFZtkg.PNG/Gemini_Generated_Image_px7fb9px7fb9px7f.png?type=w580" alt="자갈치시장 (부산)" className="w-full h-[260px] md:h-[360px] object-cover" />
               <div className="absolute bottom-3 right-3 flex gap-2">
                 <button className="w-8 h-8 grid place-items-center rounded-full bg-black/60 text-white text-sm">‹</button>
                 <button className="w-8 h-8 grid place-items-center rounded-full bg-black/60 text-white text-sm">›</button>
@@ -239,16 +240,14 @@ export default function GoogleStyleSearchPreview() {
 
             <div className="grid gap-4">
               <div className="rounded-2xl border border-white/10 bg-[#1f2023] h-[180px] relative overflow-hidden">
-                {/* ⭐️ Ref를 사용하여 DOM 엘리먼트 참조 */}
                 <div ref={mapElementRef} id="mapPreview" className="absolute inset-0" />
-                {/* ⭐️ Leaflet 로드 전에는 로딩 표시를 보여줍니다. */}
                 {!isLeafletLoaded && (
                     <div className="absolute inset-0 flex items-center justify-center text-[#9aa0a6]">
                         지도 로딩 중...
                     </div>
                 )}
               </div>
-              {/* ... (날씨 및 이미지 섹션 생략) ... */}
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="rounded-2xl border border-white/10 bg-[#303134] p-4">
                   <div className="text-sm text-[#9aa0a6] mb-2">날씨</div>
@@ -269,7 +268,7 @@ export default function GoogleStyleSearchPreview() {
               </div>
             </div>
           </div>
-          {/* ... (기본현황, 핵심지표 섹션 생략) ... */}
+
           <div className="grid lg:grid-cols-2 gap-4 mt-4">
             <div className="rounded-2xl border border-white/10 bg-[#303134] p-4 text-[#bdc1c6] leading-relaxed">
               <div className="text-[#e8eaed] font-semibold mb-2">기본현황</div>
@@ -289,7 +288,6 @@ export default function GoogleStyleSearchPreview() {
         <section>
           <p className="text-sm text-[#9aa0a6] mb-3">약 {results.length.toLocaleString()}개 결과</p>
           <ul className="space-y-6">
-            {/* 검색 결과 렌더링 */}
             {results.map((r, i) => (
               <li key={i} className="group border-b border-white/10 pb-4">
                 <div className="text-xs text-[#9aa0a6] mb-1">{r.displayUrl}</div>
@@ -305,7 +303,7 @@ export default function GoogleStyleSearchPreview() {
             ))}
           </ul>
         </section>
-        {/* ... (Aside/Knowledge Panel 및 Footer 부분 생략) ... */}
+
         <aside className="hidden lg:block lg:sticky lg:top-[76px] h-fit">
           <div className="rounded-2xl border border-white/10 bg-[#303134] overflow-hidden shadow">
             <a href="https://commons.wikimedia.org/wiki/File:Camellia_japonica_NBG.jpg" target="_blank" rel="noreferrer" className="block">
@@ -331,7 +329,6 @@ export default function GoogleStyleSearchPreview() {
   );
 }
 
-// ⭐️ CSS 임포트는 첫 번째 useEffect로 이동했으므로, 이 블록에서 Leaflet 관련 CSS를 제거했습니다.
 const style = document.createElement('style');
 style.innerHTML = `
   .no-scrollbar::-webkit-scrollbar { display: none; }
