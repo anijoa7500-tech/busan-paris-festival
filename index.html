@@ -278,7 +278,6 @@
         const L = window.L;
         const el = document.getElementById("mapPreview");
         
-        // Leaflet 라이브러리가 로드되지 않았다면 종료
         if (!L || !el) {
              return;
         }
@@ -303,14 +302,20 @@
             // 마커 추가
             L.marker([35.104, 128.966]).addTo(mapInstance).bindPopup("하단역").openPopup();
             
-            // **[수정] 크기 오류 해결을 위해 초기화 후 50ms 지연 호출**
-            // Leaflet이 Grid 레이아웃의 최종 크기를 확정하기까지 기다립니다.
-            mapInstance.whenReady(function() {
-                this.invalidateSize(true);
+            
+            // 💡 [최종 수정] 크기 오류 해결을 위해 초기화 직후 및 200ms 지연 후 강제 재계산
+            // Leaflet 버그 해결의 가장 확실한 방법입니다.
+            if (mapInstance) {
+                // 1. 초기화 직후 한번 호출
+                mapInstance.invalidateSize(true); 
+                
+                // 2. DOM 렌더링이 완료될 시간을 주기 위해 200ms 후 다시 호출
                 setTimeout(() => {
-                    this.invalidateSize(true);
-                }, 50); // 50ms 후 강제 재계산
-            });
+                    if (mapInstance) {
+                        mapInstance.invalidateSize(true);
+                    }
+                }, 200); 
+            }
 
         } catch (err) {
             console.error("Leaflet map initialization failed:", err);
