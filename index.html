@@ -32,9 +32,9 @@
             height: 100%;
         }
 
-        /* Leaflet Map 컨테이너 배경색 설정 */
+        /* Leaflet Map 컨테이너 배경색 설정 (옵션: 기본 OSM은 필요 없을 수 있음) */
         #mapPreview .leaflet-container {
-            background-color: #ccc;
+            background-color: #e6e6e6; /* 밝은 배경색으로 변경, 지도 색상에 따라 조절 가능 */
         }
     </style>
 </head>
@@ -259,21 +259,24 @@
                 mapInstance = null;
             }
 
-            // 1. 지도 초기화 (하단역 근처 좌표)
+            // 1. 지도 초기화 (부산 하단역 근처 좌표)
             mapInstance = L.map(el, { 
                 zoomControl: false, 
                 scrollWheelZoom: false 
-            }).setView([35.104, 128.966], 15);
+            }).setView([35.104, 128.966], 14); // 줌 레벨을 14로 조정하여 더 넓은 범위 표시
 
-            // 2. 타일셋 적용 (회색 톤 스타일)
-            L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
-                attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery &copy; <a href="https://carto.com/attributions">CARTO</a>',
-                subdomains: 'abcd',
-                maxZoom: 20
+            // 2. 🎨 OpenStreetMap 타일셋 적용 (컬러풀한 디테일 추가)
+            L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                maxZoom: 19,
+                detectRetina: true // 고해상도 디스플레이 지원
             }).addTo(mapInstance);
             
-            // 3. 마커 추가
-            L.marker([35.104, 128.966]).addTo(mapInstance).bindPopup("하단역").openPopup();
+            // 3. 마커 추가 및 팝업 내용 디테일 추가
+            L.marker([35.104, 128.966])
+                .addTo(mapInstance)
+                .bindPopup("<b>부산외국어대학교 글로컬크리에이터 하단팀</b><br>하단역 5번 출구 부근")
+                .openPopup();
             
             
             // 4. ⭐️ 최종 안정화 로직: MutationObserver 및 지연 호출 ⭐️
