@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>부산 파리 마르쉐 · 공식 안내</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        html { scroll-behavior: smooth; }
+        .icon { width: 1.25rem; height: 1.25rem; }
+    </style>
+</head>
+<body class="min-h-screen bg-gray-50 text-gray-800">
+    
+    <div id="app">
+        <header class="sticky top-0 z-40 bg-white/80 backdrop-blur border-b">
+            <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+                <a href="#top" class="flex items-center gap-2 font-semibold hover:opacity-80">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                    부산 파리 마르쉐
+                </a>
+                <nav class="hidden sm:flex items-center gap-4 text-sm">
+                    <a href="#about" class="hover:underline">행사 소개</a>
+                    <a href="#highlights" class="hover:underline">하이라이트</a>
+                    <a href="#schedule" class="hover:underline">공연·프로그램</a>
+                    <a href="#vendors" class="hover:underline">마르쉐 부스</a>
+                    <a href="#map" class="hover:underline">지도 &amp; 오시는 길</a>
+                    <a href="#tickets" class="hover:underline">티켓·예약</a>
+                    <a href="#faq" class="hover:underline">FAQ</a>
+                    <a href="#contact" class="hover:underline">문의</a>
+                </nav>
+                <div class="flex items-center gap-2">
+                    <a
+                        href="https://example.com/rsvp"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="px-3 py-1.5 border rounded-xl hover:bg-gray-50 text-sm flex items-center gap-1"
+                    >
+                        <svg class="icon w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.87 0-3.43.83-4.5 2.15C10.93 3.83 9.37 3 7.5 3A5.5 5.5 0 0 0 2 8.5c0 2.3 1.51 4.05 3 5.5l7 7Z"/></svg> 
+                        RSVP
+                    </a>
+                    <a
+                        href="https://example.com/tickets"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="px-3 py-1.5 bg-black text-white rounded-xl hover:opacity-90 text-sm flex items-center gap-1"
+                    >
+                        <svg class="icon w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9a4 4 0 0 1 4-4h12a4 4 0 0 1 4 4v6a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V9Z"/><path d="M11 9h1M11 15h1M7 9h.01M7 15h.01M15 9h.01M15 15h.01"/></svg>
+                        예매
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <section id="top" class="relative">
+            <img src="https://images.unsplash.com/photo-1467269204594-9661b134dd2b?q=80&w=1600&auto=format&fit=crop" 
+                 alt="Festival night market visual" 
+                 class="w-full h-[56vh] object-cover" />
+            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+            <div class="absolute bottom-6 left-1/2 -translate-x-1/2 max-w-6xl w-full px-4 text-white">
+                <h1 class="text-4xl font-bold drop-shadow">부산 파리 마르쉐 (Busan Paris Festival)</h1>
+                <p class="opacity-95 text-lg mt-2 flex items-center gap-3">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg> 
+                    2025. 12. 6(토) – 12. 7(일)
+                    <svg class="icon ml-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> 
+                    11:00 – 20:30
+                </p>
+                <p class="opacity-95 mt-1 flex items-center gap-2">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg> 
+                    사하구 하단 문화의거리(가상)
+                </p>
+                <div class="mt-4 flex flex-wrap gap-2">
+                    <a href="#tickets" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-900 rounded-xl hover:bg-gray-100">
+                        지금 예매 
+                        <svg class="icon w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </a>
+                    <a href="#about" class="inline-flex items-center gap-2 px-4 py-2 border rounded-xl hover:bg-white/10">자세히 보기</a>
+                </div>
+            </div>
+        </section>
+
+        <section id="about" class="max-w-6xl mx-auto px-4 py-14" aria-labelledby="about-title">
+            <div class="flex items-center gap-2 mb-6">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                <h2 id="about-title" class="text-2xl font-semibold">행사 소개</h2>
+            </div>
+            <div class="grid md:grid-cols-3 gap-6 text-lg leading-relaxed">
+                <p class="md:col-span-2">
+                    <strong>부산 파리 마르쉐</strong>는 프랑스의 마르쉐와 카페 문화를 부산 상점가에 그대로 옮겨온 도시형 축제입니다. 빵·디저트·치즈와 함께
+                    샹송·재즈 공연, 포토스폿, 스탬프 투어까지 하루 종일 즐길 수 있어요. 지역 상점과 청년 셀러가 함께 만드는 상생형 행사로,
+                    방문객에게는 "부산 속 작은 파리"를, 상인들에게는 새로운 손님과 스토리를 선물합니다.
+                </p>
+                <div class="rounded-2xl border bg-white p-5 shadow-sm text-sm">
+                    <div class="flex items-center gap-2 font-medium mb-3">
+                        <svg class="icon w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg> 
+                        일정 요약
+                    </div>
+                    <ul class="space-y-2">
+                        <li><strong>일시</strong> 2025. 12. 6(토) – 12. 7(일) / 11:00 – 20:30</li>
+                        <li><strong>장소</strong> 사하구 하단 문화의거리(가상)</li>
+                        <li><strong>입장</strong> 일부 무료, 클래스·페어링 프로그램은 유료/사전예약</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="highlights" class="max-w-6xl mx-auto px-4 py-14" aria-labelledby="highlights-title">
+            <div class="flex items-center gap-2 mb-6">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.6 5.5 6.1.9-4.4 4.2 1 6.1L12 18.2l-5.3 1.9 1-6.1-4.4-4.2 6.1-.9L12 2z"/></svg>
+                <h2 id="highlights-title" class="text-2xl font-semibold">하이라이트</h2>
+            </div>
+            <div class="grid md:grid-cols-4 sm:grid-cols-2 grid-cols-1 gap-4">
+                <div class="rounded-2xl border bg-white p-5 shadow-sm">
+                    <div class="flex items-center gap-2">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                        <h3 class="font-medium">프렌치 마르쉐</h3>
+                    </div>
+                    <p class="text-sm text-gray-700 mt-2">크루아상, 바게트, 치즈, 플라워&아트 마켓</p>
+                </div>
+                <div class="rounded-2xl border bg-white p-5 shadow-sm">
+                    <div class="flex items-center gap-2">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 18a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM12 6v12M7 18a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM17 6h5M2 6h5"/></svg>
+                        <h3 class="font-medium">스트리트 공연</h3>
+                    </div>
+                    <p class="text-sm text-gray-700 mt-2">샹송·재즈 라이브, 거리 버스킹, DJ 라운지</p>
+                </div>
+                <div class="rounded-2xl border bg-white p-5 shadow-sm">
+                    <div class="flex items-center gap-2">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3Z"/><circle cx="12" cy="13" r="3"/></svg>
+                        <h3 class="font-medium">포토스폿</h3>
+                    </div>
+                    <p class="text-sm text-gray-700 mt-2">에펠 오브제, 파리 골목 연출, 야간 조명</p>
+                </div>
+                <div class="rounded-2xl border bg-white p-5 shadow-sm">
+                    <div class="flex items-center gap-2">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9a4 4 0 0 1 4-4h12a4 4 0 0 1 4 4v6a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V9Z"/><path d="M11 9h1M11 15h1M7 9h.01M7 15h.01M15 9h.01M15 15h.01"/></svg>
+                        <h3 class="font-medium">스탬프 투어</h3>
+                    </div>
+                    <p class="text-sm text-gray-700 mt-2">상점가 도장 5개 모으면 한정 굿즈</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="schedule" class="max-w-6xl mx-auto px-4 py-14" aria-labelledby="schedule-title">
+            <div class="flex items-center gap-2 mb-6">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                <h2 id="schedule-title" class="text-2xl font-semibold">공연·프로그램</h2>
+            </div>
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="rounded-2xl border bg-white p-5 shadow-sm">
+                    <div class="flex items-center justify-between">
+                        <div class="font-semibold">Day 1 (토)</div>
+                        <div class="text-sm text-gray-500">12/6</div>
+                    </div>
+                    <ul class="mt-3 divide-y text-sm">
+                        <li class="py-2 flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <svg class="icon w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> <span class="font-medium">11:00</span>
+                                <span class="text-gray-800">오프닝 &amp; 마르쉐 오픈</span>
+                            </div>
+                            <span class="text-gray-500">Main Street</span>
+                        </li>
+                        <li class="py-2 flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <svg class="icon w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> <span class="font-medium">13:00</span>
+                                <span class="text-gray-800">크루아상 클래스(사전예약)</span>
+                            </div>
+                            <span class="text-gray-500">Atelier Tent A</span>
+                        </li>
+                        <li class="py-2 flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <svg class="icon w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> <span class="font-medium">16:30</span>
+                                <span class="text-gray-800">샹송 라이브</span>
+                            </div>
+                            <span class="text-gray-500">Stage A</span>
+                        </li>
+                        <li class="py-2 flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <svg class="icon w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> <span class="font-medium">19:00</span>
+                                <span class="text-gray-800">야외 재즈</span>
+                            </div>
+                            <span class="text-gray-500">Stage A</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="rounded-2xl border bg-white p-5 shadow-sm">
+                    <div class="flex items-center justify-between">
+                        <div class="font-semibold">Day 2 (일)</div>
+                        <div class="text-sm text-gray-500">12/7</div>
+                    </div>
+                    <ul class="mt-3 divide-y text-sm">
+                        <li class="py-2 flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <svg class="icon w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> <span class="font-medium">11:00</span>
+                                <span class="text-gray-800">마르쉐 오픈</span>
+                            </div>
+                            <span class="text-gray-500">Main Street</span>
+                        </li>
+                        <li class="py-2 flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <svg class="icon w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> <span class="font-medium">14:00</span>
+                                <span class="text-gray-800">마카롱 페어링(사전예약)</span>
+                            </div>
+                            <span class="text-gray-500">Atelier Tent B</span>
+                        </li>
+                        <li class="py-2 flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <svg class="icon w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> <span class="font-medium">17:00</span>
+                                <span class="text-gray-800">버스킹 스페셜</span>
+                            </div>
+                            <span class="text-gray-500">Stage B</span>
+                        </li>
+                        <li class="py-2 flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <svg class="icon w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> <span class="font-medium">20:00</span>
+                                <span class="text-gray-800">클로징 퍼레이드</span>
+                            </div>
+                            <span class="text-gray-500">Main Street</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="vendors" class="max-w-6xl mx-auto px-4 py-14" aria-labelledby="vendors-title">
+            <div class="flex items-center gap-2 mb-6">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                <h2 id="vendors-title" class="text-2xl font-semibold">마르쉐 부스</h2>
+            </div>
+            <div class="grid md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-4">
+                <div class="rounded-2xl overflow-hidden border bg-white">
+                    <img alt="Le Pain Bleu cover" src="https://bleu-blanc-coeur.org/wp-content/uploads/2020/11/pain-bbc-1200px-1024x521.jpg" class="w-full h-28 object-cover" />
+                    <div class="p-4">
+                        <div class="font-medium flex items-center gap-2">Le Pain Bleu</div>
+                        <p class="text-sm text-gray-700 mt-1">바게트·사워도우</p>
+                        <a class="text-sm text-blue-600 hover:underline inline-flex items-center gap-1 mt-2" 
+                           href="https://map.kakao.com/?q=Le%20Pain%20Bleu%20%EB%B6%80%EC%82%B0" 
+                           target="_blank" rel="noopener noreferrer">
+                            <svg class="icon w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M10 14L21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg> 
+                            위치 보기
+                        </a>
+                    </div>
+                </div>
+                <div class="rounded-2xl overflow-hidden border bg-white">
+                    <img alt="Maison de Crème cover" src="https://www.saeropnl.com/upload/goods/2016051014125803065/2016051014125803065_0_500.webp" class="w-full h-28 object-cover" />
+                    <div class="p-4">
+                        <div class="font-medium flex items-center gap-2">Maison de Crème</div>
+                        <p class="text-sm text-gray-700 mt-1">마카롱·에클레어</p>
+                        <a class="text-sm text-blue-600 hover:underline inline-flex items-center gap-1 mt-2" 
+                           href="https://map.kakao.com/?q=%EB%A7%88%EC%B9%B4%EB%A1%B1" 
+                           target="_blank" rel="noopener noreferrer">
+                            <svg class="icon w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M10 14L21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg> 
+                            위치 보기
+                        </a>
+                    </div>
+                </div>
+                <div class="rounded-2xl overflow-hidden border bg-white">
+                    <img alt="Fromage Atelier cover" src="https://wine21.speedgabia.com/NEWS_MST/froala/202407/20240725095200768949.png" class="w-full h-28 object-cover" />
+                    <div class="p-4">
+                        <div class="font-medium flex items-center gap-2">Fromage Atelier</div>
+                        <p class="text-sm text-gray-700 mt-1">치즈 페어링</p>
+                        <a class="text-sm text-blue-600 hover:underline inline-flex items-center gap-1 mt-2" 
+                           href="https://map.kakao.com/?q=%EC%B9%98%EC%A6%88" 
+                           target="_blank" rel="noopener noreferrer">
+                            <svg class="icon w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M10 14L21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg> 
+                            위치 보기
+                        </a>
+                    </div>
+                </div>
+                <div class="rounded-2xl overflow-hidden border bg-white">
+                    <img alt="Fleur de Busan cover" src="https://www.flowerarts.co.kr/shopimages/florense/046000000047.jpg?1582776395" class="w-full h-28 object-cover" />
+                    <div class="p-4">
+                        <div class="font-medium flex items-center gap-2">Fleur de Busan</div>
+                        <p class="text-sm text-gray-700 mt-1">플라워 부케</p>
+                        <a class="text-sm text-blue-600 hover:underline inline-flex items-center gap-1 mt-2" 
+                           href="https://map.kakao.com/?q=%ED%94%8C%EB%9D%BC%EC%9B%8C" 
+                           target="_blank" rel="noopener noreferrer">
+                            <svg class="icon w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M10 14L21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg> 
+                            위치 보기
+                        </a>
+                    </div>
+                </div>
+                <div class="rounded-2xl overflow-hidden border bg-white">
+                    <img alt="Petit Souvenir cover" src="https://www.obonparis.com/uploads/TOP%20SOUVENIR%20LIST%20-%20PARIS%20EST%20TJS%20PARIS/PARIS%20EST%20TOURJOURS%20PARIS%20EXEMPLES5.JPG" class="w-full h-28 object-cover" />
+                    <div class="p-4">
+                        <div class="font-medium flex items-center gap-2">Petit Souvenir</div>
+                        <p class="text-sm text-gray-700 mt-1">프렌치 굿즈</p>
+                        <a class="text-sm text-blue-600 hover:underline inline-flex items-center gap-1 mt-2" 
+                           href="https://map.kakao.com/?q=%EA%B5%BF%EC%A6%88" 
+                           target="_blank" rel="noopener noreferrer">
+                            <svg class="icon w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M10 14L21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg> 
+                            위치 보기
+                        </a>
+                    </div>
+                </div>
+                <div class="rounded-2xl overflow-hidden border bg-white">
+                    <img alt="Cafe Seine cover" src="https://gongu.copyright.or.kr/gongu/wrt/cmmn/wrtFileImageView.do?wrtSn=13048952&filePath=L2Rpc2sxL25ld2RhdGEvMjAxNy85OC9DTFM2L1dSVF9UUkVBU1VSRV9IVU5UXzIwMTcwOTExXzkw&thumbAt=Y&thumbSe=b_tbumb&wrtTy=10006" class="w-full h-28 object-cover" />
+                    <div class="p-4">
+                        <div class="font-medium flex items-center gap-2">Cafe Seine</div>
+                        <p class="text-sm text-gray-700 mt-1">카페·라떼아트</p>
+                        <a class="text-sm text-blue-600 hover:underline inline-flex items-center gap-1 mt-2" 
+                           href="https://map.kakao.com/?q=%EC%B9%B4%ED%8E%98" 
+                           target="_blank" rel="noopener noreferrer">
+                            <svg class="icon w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M10 14L21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg> 
+                            위치 보기
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="map" class="max-w-6xl mx-auto px-4 py-14" aria-labelledby="map-title">
+            <div class="flex items-center gap-2 mb-6">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                <h2 id="map-title" class="text-2xl font-semibold">지도 &amp; 오시는 길</h2>
+            </div>
+            <div class="rounded-2xl border bg-white p-5 shadow">
+                <div class="grid md:grid-cols-3 gap-4 items-start">
+                    <div class="md:col-span-2">
+                        <div id="leafletMap" class="aspect-video w-full rounded-xl border" aria-label="festival map"></div>
+                    </div>
+                    <div class="space-y-3">
+                        <a
+                            href="https://map.kakao.com/link/map/Busan%20Paris%20Festival,35.104,128.966"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="w-full inline-flex items-center justify-center gap-2 px-4 py-2 border rounded-xl hover:bg-gray-50"
+                        >
+                            <svg class="icon w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M10 14L21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg> 
+                            카카오맵으로 열기
+                        </a>
+                        <a
+                            href="https://map.naver.com/v5/search/%ED%95%98%EB%8B%A8%20%EB%AC%B8%ED%99%94%EC%9D%98%EA%B1%B0%EB%A6%AC"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="w-full inline-flex items-center justify-center gap-2 px-4 py-2 border rounded-xl hover:bg-gray-50"
+                        >
+                            <svg class="icon w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M10 14L21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg> 
+                            네이버지도에서 보기
+                        </a>
+                        <a
+                            href="https://map.kakao.com/link/to/%EB%B6%80%EC%82%B0%20%ED%8C%8C%EB%A6%AC%20%EB%A7%88%EB%A5%B4%EC%89%98,35.104,128.966"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="w-full inline-flex items-center justify-center gap-2 px-4 py-2 border rounded-xl hover:bg-gray-50"
+                        >
+                            <svg class="icon w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M10 14L21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg> 
+                            카카오 길찾기(목적지)
+                        </a>
+                        <div class="pt-2 text-sm text-gray-700">
+                            <div class="flex items-center gap-2 font-medium mb-1">
+                                <svg class="icon w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 17v-5c0-1.1.9-2 2-2h16c1.1 0 2 .9 2 2v5M18 17h1a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h1M5 17v-4M19 17v-4M9 17h6M12 2l-1 3h2l-1-3Z"/></svg> 
+                                지하철
+                            </div>
+                            <p>1호선 <strong>하단역</strong> 7·8번 출구 도보 5–8분.</p>
+                            <div class="flex items-center gap-2 font-medium mt-3 mb-1">
+                                <svg class="icon w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 13.9 16 11l-3.3-1.6c-.3-.1-.6-.1-.9 0L8 11l-2 2.9c-1.4 2-3.1 3.5-3.1 5.6 0 .5.4 1 1 1h16.2c.5 0 1-.5 1-1 0-2.1-1.7-3.6-3.1-5.6Z"/><path d="M6 14.5l6-3.5 6 3.5"/></svg> 
+                                공항
+                            </div>
+                            <p>김해공항 → 부산김해경전철(사상 환승) → 1호선 하단역, 약 45–60분.</p>
+                            <div class="flex items-center gap-2 font-medium mt-3 mb-1">
+                                <svg class="icon w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2Z"/><circle cx="7.5" cy="14.5" r="2.5"/><circle cx="16.5" cy="14.5" r="2.5"/></svg> 
+                                자동차
+                            </div>
+                            <p>을숙도대교/낙동강대로 경유 시 남포·부산역 25–40분.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="tickets" class="max-w-6xl mx-auto px-4 py-14" aria-labelledby="tickets-title">
+            <div class="flex items-center gap-2 mb-6">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9a4 4 0 0 1 4-4h12a4 4 0 0 1 4 4v6a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V9Z"/><path d="M11 9h1M11 15h1M7 9h.01M7 15h.01M15 9h.01M15 15h.01"/></svg>
+                <h2 id="tickets-title" class="text-2xl font-semibold">티켓·예약</h2>
+            </div>
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="rounded-2xl border bg-white p-6 shadow-sm">
+                    <h3 class="font-semibold mb-2">무료 입장 / 유료 프로그램</h3>
+                    <ul class="text-sm list-disc pl-5 space-y-1 text-gray-700">
+                        <li>마르쉐&amp;공연은 무료 관람</li>
+                        <li>클래스/페어링(한정 좌석)은 유료·사전예약</li>
+                        <li>스탬프 투어 참여 시 한정 굿즈 교환</li>
+                    </ul>
+                    <div class="mt-4 flex flex-wrap gap-2">
+                        <a
+                            href="https://example.com/tickets"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="inline-flex items-center gap-2 px-4 py-2 bg-black text-white rounded-xl hover:opacity-90"
+                        >
+                            <svg class="icon w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9a4 4 0 0 1 4-4h12a4 4 0 0 1 4 4v6a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V9Z"/><path d="M11 9h1M11 15h1M7 9h.01M7 15h.01M15 9h.01M15 15h.01"/></svg> 
+                            예매하기
+                        </a>
+                        <a
+                            href="https://example.com/rsvp"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="inline-flex items-center gap-2 px-4 py-2 border rounded-xl hover:bg-gray-50"
+                        >
+                            <svg class="icon w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.87 0-3.43.83-4.5 2.15C10.93 3.83 9.37 3 7.5 3A5.5 5.5 0 0 0 2 8.5c0 2.3 1.51 4.05 3 5.5l7 7Z"/></svg> 
+                            RSVP 남기기
+                        </a>
+                    </div>
+                </div>
+                <div class="rounded-2xl border bg-white p-6 shadow-sm">
+                    <h3 class="font-semibold mb-2">셀러·공연자 모집</h3>
+                    <p class="text-sm text-gray-700">프렌치 감성 디저트/베이커리, 치즈, 플라워, 아트, 굿즈 셀러 및 버스킹/밴드/재즈팀을 모집합니다.</p>
+                    <a
+                        href="mailto:info@busan-parisfest.kr"
+                        class="inline-flex items-center gap-2 mt-3 px-4 py-2 border rounded-xl hover:bg-gray-50 text-sm"
+                    >
+                        <svg class="icon w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg> 
+                        셀러/공연자 문의
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <section id="gallery" class="max-w-6xl mx-auto px-4 py-14" aria-labelledby="gallery-title">
+            <div class="flex items-center gap-2 mb-6">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3Z"/><circle cx="12" cy="13" r="3"/></svg>
+                <h2 id="gallery-title" class="text-2xl font-semibold">갤러리</h2>
+            </div>
+            <div class="grid md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-4">
+                <img src="https://images.unsplash.com/photo-1526045612212-70caf35c14df?q=80&w=1200&auto=format&fit=crop" alt="festival preview 1" class="w-full h-56 object-cover rounded-2xl border" />
+                <img src="https://images.unsplash.com/photo-1470337458703-46ad1756a187?q=80&w=1200&auto=format&fit=crop" alt="festival preview 2" class="w-full h-56 object-cover rounded-2xl border" />
+                <img src="https://images.unsplash.com/photo-1453831362806-3d5577f014a4?q=80&w=1200&auto=format&fit=crop" alt="festival preview 3" class="w-full h-56 object-cover rounded-2xl border" />
+            </div>
+        </section>
+
+        <section id="faq" class="max-w-6xl mx-auto px-4 py-14" aria-labelledby="faq-title">
+            <div class="flex items-center gap-2 mb-6">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                <h2 id="faq-title" class="text-2xl font-semibold">FAQ</h2>
+            </div>
+            <div class="grid md:grid-cols-2 gap-4">
+                <details class="rounded-2xl border bg-white p-5 shadow-sm">
+                    <summary class="cursor-pointer font-medium">우천 시에도 진행하나요?</summary>
+                    <p class="text-sm text-gray-700 mt-2">우천 시 일부 프로그램(야외 공연)은 변경되거나 텐트 내로 이동될 수 있습니다.</p>
+                </details>
+                <details class="rounded-2xl border bg-white p-5 shadow-sm">
+                    <summary class="cursor-pointer font-medium">반려견 동반 가능한가요?</summary>
+                    <p class="text-sm text-gray-700 mt-2">목줄 착용 시 가능하나, 혼잡 시간에는 안전 요원의 안내를 따라 주세요.</p>
+                </details>
+                <details class="rounded-2xl border bg-white p-5 shadow-sm">
+                    <summary class="cursor-pointer font-medium">현금이 꼭 필요한가요?</summary>
+                    <p class="text-sm text-gray-700 mt-2">대부분 부스는 카드/QR 결제가 가능합니다. 일부 소액 결제는 현금만 가능할 수 있습니다.</p>
+                </details>
+            </div>
+        </section>
+
+        <section id="contact" class="max-w-6xl mx-auto px-4 py-14" aria-labelledby="contact-title">
+            <div class="flex items-center gap-2 mb-6">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                <h2 id="contact-title" class="text-2xl font-semibold">문의</h2>
+            </div>
+            <div class="rounded-2xl border bg-white p-6 shadow-sm text-center">
+                <div class="flex flex-col items-center gap-2">
+                    <div class="text-lg font-semibold">사하구 하단 문화의거리(가상)</div>
+                    <div class="text-sm text-gray-600">Hadan Culture Street, Saha-gu, Busan</div>
+                    <div class="mt-3 flex flex-wrap justify-center gap-2">
+                        <a href="tel:+82-51-000-0000" class="px-3 py-2 border rounded-xl hover:bg-gray-50 text-sm inline-flex items-center gap-2">
+                            <svg class="icon w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.63A2 2 0 0 1 3.08 2h3a2 2 0 0 1 2 1.73A15.9 15.9 0 0 0 10 9l-1 2 2 2 2 2 2-1 3.27 1.27a2 2 0 0 1 1.73 2Z"/></svg> 
+                            +82-51-000-0000
+                        </a>
+                        <a href="mailto:info@busan-parisfest.kr" class="px-3 py-2 border rounded-xl hover:bg-gray-50 text-sm inline-flex items-center gap-2">
+                            <svg class="icon w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg> 
+                            info@busan-parisfest.kr
+                        </a>
+                        <a href="https://instagram.com/" target="_blank" rel="noopener noreferrer" class="px-3 py-2 border rounded-xl hover:bg-gray-50 text-sm inline-flex items-center gap-2">
+                            <svg class="icon w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 3h-8a5 5 0 0 0-5 5v8a5 5 0 0 0 5 5h8a5 5 0 0 0 5-5V8a5 5 0 0 0-5-5Z"/><path d="M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"/><path d="M17.5 6.5h.01"/></svg> 
+                            Instagram
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer class="border-t">
+            <div class="max-w-6xl mx-auto px-4 py-6 text-sm text-gray-600 flex items-center justify-between">
+                <span>© 2025 부산 파리 마르쉐</span>
+                <a class="hover:underline" href="#top">Back to top</a>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Leaflet Map Initialization
+        function initLeafletMap() {
+            const mapContainer = document.getElementById('leafletMap');
+            if (!mapContainer) return;
+
+            const COORDS = { lat: 35.104, lng: 128.966 }; // 하단 근처 좌표
+            const FEST_SHORT_NAME = "부산 파리 마르쉐";
+            const FEST_PLACE_EN = "Hadan Culture Street, Saha-gu, Busan";
+
+            // Leaflet이 로드되었는지 확인하고 맵 초기화
+            if (typeof window.L !== 'undefined') {
+                const map = L.map(mapContainer, { scrollWheelZoom: false }).setView([COORDS.lat, COORDS.lng], 14);
+
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors',
+                    maxZoom: 19,
+                }).addTo(map);
+
+                const marker = L.marker([COORDS.lat, COORDS.lng]).addTo(map);
+                marker.bindPopup(`<b>${FEST_SHORT_NAME}</b><br>${FEST_PLACE_EN}`).openPopup();
+
+                // 맵이 올바르게 렌더링되도록 크기 무효화
+                setTimeout(() => map.invalidateSize(), 300);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', initLeafletMap);
+    </script>
+</body>
+</html>
