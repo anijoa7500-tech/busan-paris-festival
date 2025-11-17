@@ -31,9 +31,9 @@
             height: 100%;
         }
 
-        /* Leaflet Map 컨테이너 배경색 설정 (다크 모드 대비) */
+        /* Leaflet Map 컨테이너 배경색 설정 (밝은 지도 배경에 대비) */
         #mapPreview .leaflet-container {
-            background-color: #ccc; /* 밝은 지도 배경에 대비하여 배경색을 설정합니다. */
+            background-color: #ccc; 
         }
     </style>
 </head>
@@ -278,10 +278,9 @@
         const L = window.L;
         const el = document.getElementById("mapPreview");
         
+        // Leaflet 라이브러리가 로드되지 않았다면 종료
         if (!L || !el) {
-            // Leaflet 라이브러리가 로드되지 않았다면 잠시 후 다시 시도
-            setTimeout(initializeMap, 100); 
-            return;
+             return;
         }
 
         try {
@@ -296,7 +295,7 @@
                 scrollWheelZoom: false // 스크롤 방지 
             }).setView([35.104, 128.966], 14);
             
-            // **[수정된 안정적인 타일셋] 표준 OpenStreetMap 타일 적용**
+            // 안정적인 표준 OpenStreetMap 타일 적용
             L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             }).addTo(mapInstance);
@@ -304,9 +303,13 @@
             // 마커 추가
             L.marker([35.104, 128.966]).addTo(mapInstance).bindPopup("하단역").openPopup();
             
-            // 지도가 완전히 준비되었을 때 크기를 재계산하여 레이아웃 문제 해결
+            // **[수정] 크기 오류 해결을 위해 초기화 후 50ms 지연 호출**
+            // Leaflet이 Grid 레이아웃의 최종 크기를 확정하기까지 기다립니다.
             mapInstance.whenReady(function() {
-                this.invalidateSize();
+                this.invalidateSize(true);
+                setTimeout(() => {
+                    this.invalidateSize(true);
+                }, 50); // 50ms 후 강제 재계산
             });
 
         } catch (err) {
@@ -316,6 +319,7 @@
 
     document.addEventListener('DOMContentLoaded', () => {
         renderResults(seedResults);
+        // DOMContentLoaded에서 초기화 시도
         initializeMap();
     });
 
