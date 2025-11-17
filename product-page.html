@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[부산한정] NFC 비누비누 베이베 키링 - GLOCAL:HD</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 추가적인 CSS (tailwind-prose는 CDN에 포함되어 있지 않아 직접 스타일링) */
+        .prose h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #1f2937; /* gray-900 */
+        }
+        .prose p {
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .prose ul {
+            list-style-type: disc;
+            padding-left: 1.25rem;
+        }
+        .prose li {
+            margin-top: 0.25rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="app" class="min-h-screen bg-white">
+        <header class="sticky top-0 z-20 bg-white/90 backdrop-blur border-b">
+            <div class="max-w-7xl mx-auto flex items-center justify-between px-4 py-3">
+                <a href="index.html" class="flex items-center gap-2">
+                    <span class="text-2xl font-extrabold tracking-tight">GLOCAL:HD</span>
+                </a>
+                <nav class="hidden md:flex gap-6 text-sm text-gray-600">
+                    <a href="#" class="hover:text-black">전체 상품</a>
+                    <a href="#" class="hover:text-black">의류</a>
+                    <a href="#" class="hover:text-black">문구/오피스</a>
+                    <a href="#" class="hover:text-black">액세서리</a>
+                    <a href="#" class="hover:text-black">스포츠</a>
+                </nav>
+            </div>
+        </header>
+
+        <main class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 p-4 md:p-8">
+            <section class="flex items-center justify-center bg-gray-100 rounded-2xl border relative overflow-hidden p-3 md:p-4">
+                <img
+                    id="productImage"
+                    src="" 
+                    alt="제품 미리보기"
+                    onclick="setPreview(true)"
+                    referrerPolicy="no-referrer"
+                    crossOrigin="anonymous"
+                    class="object-contain w-full h-auto max-w-[88%] max-h-[68vh] rounded-xl shadow select-none cursor-zoom-in transition-transform duration-300 hover:scale-[1.02]"
+                    style="image-rendering: crisp-edges;"
+                />
+
+                <div id="previewModal" onclick="setPreview(false)" class="fixed inset-0 bg-black/90 hidden items-center justify-center z-50 cursor-zoom-out">
+                    <img
+                        id="previewImage"
+                        src=""
+                        alt="확대 미리보기"
+                        class="max-w-[95vw] max-h-[90vh] rounded-2xl shadow object-contain select-none"
+                    />
+                    <button
+                        onclick="setPreview(false)"
+                        class="absolute top-6 right-6 text-white text-3xl font-light"
+                        aria-label="닫기"
+                    >
+                        ×
+                    </button>
+                </div>
+            </section>
+
+            <aside class="flex flex-col gap-5 lg:pl-4">
+                <div>
+                    <p class="text-gray-500 text-sm" id="brandText">Other Brands</p>
+                    <h1 class="text-2xl md:text-3xl font-bold mt-1" id="titleText">[부산한정] NFC 비누비누 베이베 키링</h1>
+                </div>
+
+                <div class="flex items-center gap-2 text-amber-500" id="ratingStars">
+                    </div>
+
+                <div class="text-xl md:text-2xl font-semibold" id="priceText"></div>
+
+                <div>
+                    <p class="text-sm font-medium mb-2">색상 - <span id="colorLabel">레인보우</span></p>
+                    <div class="flex flex-wrap gap-2" id="colorOptions">
+                        </div>
+                </div>
+
+                <div>
+                    <p class="text-sm font-medium mb-2">사이즈</p>
+                    <div class="inline-flex items-center gap-2 border rounded-lg px-3 py-1.5 text-sm bg-orange-50 border-orange-300" id="sizeText"></div>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <p class="text-sm font-medium">수량</p>
+                    <div class="inline-flex items-center border rounded-lg overflow-hidden">
+                        <button onclick="changeQty(-1)" class="px-3 py-1.5 hover:bg-gray-50" aria-label="수량 감소">−</button>
+                        <span id="quantityText" class="px-4 select-none">1</span>
+                        <button onclick="changeQty(1)" class="px-3 py-1.5 hover:bg-gray-50" aria-label="수량 증가">+</button>
+                    </div>
+                </div>
+
+                <p class="text-sm text-gray-500" id="shippingText"></p>
+
+                <button
+                    onclick="addToCart()"
+                    class="mt-1 w-full bg-black text-white py-3 rounded-lg text-lg font-medium hover:bg-gray-800 active:scale-[0.99] transition"
+                >
+                    장바구니 담기
+                </button>
+            </aside>
+        </main>
+
+        <section class="max-w-7xl mx-auto px-4 md:px-8 pb-20">
+            <div class="flex gap-4 border-b mb-6 overflow-x-auto" id="tabsContainer">
+                </div>
+
+            <div id="tabContent" class="text-gray-700">
+                </div>
+        </section>
+    </div>
+
+    <script>
+        // 1. 상태 변수 (React의 useState 대체)
+        let qty = 1;
+        let tab = "detail";
+        let color = "rainbow";
+        let preview = false;
+        let imgIdx = 0;
+
+        // 2. 데이터 정의 (React의 product, colors 대체)
+        const product = {
+            brand: "Other Brands",
+            title: "[부산한정] NFC 비누비누 베이베 키링",
+            price: 6700,
+            shipping: 3000,
+            rating: 5,
+            size: "1.8 x 1.8 x 1.2 cm",
+        };
+
+        const colors = [
+            { id: "rainbow", label: "레인보우", style: { background: "linear-gradient(90deg, #ff3b30, #ff9500, #ffcc00, #34c759, #007aff, #5856d6)" } },
+            { id: "red", label: "레드", style: { background: "#ef4444" } },
+            { id: "blue", label: "블루", style: { background: "#3b82f6" } },
+            { id: "purple", label: "퍼플", style: { background: "#8b5cf6" } },
+            { id: "orange", label: "오렌지", style: { background: "#f59e0b" } },
+            { id: "green", label: "그린", style: { background: "#22c55e" } },
+            { id: "yellow", label: "옐로우", style: { background: "#eab308" } },
+        ];
+
+        const IMG_SOURCES = [
+            // 첫 번째 소스가 실패할 경우를 대비한 대체 이미지 경로
+            "/ektl.png",
+            "https://postfiles.pstatic.net/MjAyNTExMTFfNTkg/MDAxNzYyODM3MjM0MzMy.Na9sO2glTaGleVLCPWD2Zrs6MlS2MCgH0WsY6BzR76wg.gQfkanV4LLReW_RJE2ssUci8TYj9Eug8i7XDi8v8IuIg.PNG/ektl.png?type=w580",
+            "https://images.weserv.nl/?url=" + encodeURIComponent("https://postfiles.pstatic.net/MjAyNTExMTFfNTkg/MDAxNzYyODM3MjM0MzMy.Na9sO2glTaGleVLCPWD2Zrs6MlS2MCgH0WsY6BzR76wg.gQfkanV4LLReW_RJE2ssUci8TYj9Eug8i7XDi8v8IuIg.PNG/ektl.png?type=w580"),
+        ];
+
+        // 3. 헬퍼 함수
+        const priceKR = (n) => n.toLocaleString("ko-KR");
+        
+        const getHueDeg = () => {
+            switch (color) {
+                case "red": return 340;
+                case "orange": return 20;
+                case "yellow": return 50;
+                case "green": return 100;
+                case "blue": return 210;
+                case "purple": return 270;
+                default: return 0;
+            }
+        };
+
+        // 4. DOM 업데이트 및 이벤트 핸들러 (React의 렌더링 대체)
+        
+        function updateDOM() {
+            // 이미지 업데이트
+            const imgSrc = IMG_SOURCES[Math.min(imgIdx, IMG_SOURCES.length - 1)];
+            document.getElementById('productImage').src = imgSrc;
+            document.getElementById('productImage').style.filter = `hue-rotate(${getHueDeg()}deg)`;
+            document.getElementById('productImage').onerror = () => { 
+                if (imgIdx < IMG_SOURCES.length - 1) {
+                    imgIdx++;
+                    updateDOM();
+                }
+            };
+            
+            // 프리뷰 모달 업데이트
+            document.getElementById('previewImage').src = imgSrc;
+            const modal = document.getElementById('previewModal');
+            modal.style.display = preview ? 'flex' : 'none';
+
+            // 텍스트 업데이트
+            document.getElementById('quantityText').textContent = qty;
+            document.getElementById('priceText').textContent = `₩${priceKR(product.price)}`;
+            document.getElementById('shippingText').textContent = `배송비: ${priceKR(product.shipping)}원`;
+            document.getElementById('sizeText').textContent = product.size;
+            document.getElementById('colorLabel').textContent = colors.find((c) => c.id === color).label;
+
+            // 별점 업데이트
+            const ratingStars = document.getElementById('ratingStars');
+            ratingStars.innerHTML = '';
+            for (let i = 0; i < product.rating; i++) {
+                ratingStars.innerHTML += '<span>★</span>';
+            }
+            ratingStars.innerHTML += `<span class="text-sm text-gray-500 ml-1">리뷰 3</span>`;
+
+            // 색상 옵션 버튼 업데이트
+            const colorOptions = document.getElementById('colorOptions');
+            colorOptions.innerHTML = colors.map((c) => `
+                <button
+                    onclick="setColor('${c.id}')"
+                    class="relative w-7 h-7 rounded-full border transition focus:outline-none ${color === c.id ? "ring-2 ring-black" : ""}"
+                    style="background: ${c.style.background}"
+                    aria-label="색상 ${c.label}"
+                ></button>
+            `).join('');
+
+            // 탭 업데이트
+            renderTabs();
+            renderTabContent();
+        }
+
+        // 수량 변경
+        function changeQty(delta) {
+            qty = Math.max(1, qty + delta);
+            updateDOM();
+        }
+
+        // 색상 변경
+        function setColor(newColor) {
+            color = newColor;
+            updateDOM();
+        }
+        
+        // 프리뷰 모달 표시/숨김
+        function setPreview(state) {
+            preview = state;
+            updateDOM();
+        }
+
+        // 탭 변경
+        function setTab(newTab) {
+            tab = newTab;
+            updateDOM();
+        }
+
+        // 탭 버튼 렌더링
+        function renderTabs() {
+             const tabsData = [
+                { id: "detail", label: "상세정보" },
+                { id: "review", label: "리뷰" },
+                { id: "shipping", label: "배송/교환" },
+            ];
+            const tabsContainer = document.getElementById('tabsContainer');
+            tabsContainer.innerHTML = tabsData.map((t) => `
+                <button
+                    onclick="setTab('${t.id}')"
+                    class="px-4 py-3 -mb-px border-b-2 transition text-sm ${
+                        tab === t.id ? "border-black font-semibold" : "border-transparent text-gray-500 hover:text-black"
+                    }"
+                >
+                    ${t.label}
+                </button>
+            `).join('');
+        }
+        
+        // 탭 내용 렌더링
+        function renderTabContent() {
+            const tabContent = document.getElementById('tabContent');
+            if (tab === "detail") {
+                tabContent.innerHTML = `
+                    <div class="prose max-w-none text-gray-700">
+                        <h3 class="text-xl font-semibold">제품 설명</h3>
+                        <p>포근한 흰 구름 위에 사랑스러운 아기 천사 캐릭터가 잠들어 있는 듯한 모습입니다. 💛</p>
+                        <p>노란색 머리, 옅은 파란색 턱받이, 그리고 볼을 붉힌 모습이 순수하고 귀여운 느낌을 줍니다.</p>
+                        <ul class="list-disc pl-5">
+                            <li>사이즈: ${product.size}</li>
+                            <li>재질: 레진, 메탈 링</li>
+                            <li>제조국: Korea</li>
+                        </ul>
+                    </div>
+                `;
+            } else if (tab === "review") {
+                tabContent.innerHTML = `
+                    <div class="text-gray-700">
+                        <p class="mb-2">⭐️⭐️⭐️⭐️⭐️  만족합니다! (by *s****)</p>
+                        <p class="mb-2">⭐️⭐️⭐️⭐️   선물용으로 좋아요 (by *j***)</p>
+                        <p class="mb-2">⭐️⭐️⭐️⭐️⭐️  사진보다 실물이 더 귀엽습니다 (by *y****)</p>
+                    </div>
+                `;
+            } else if (tab === "shipping") {
+                tabContent.innerHTML = `
+                    <div class="text-gray-700">
+                        <h3 class="text-xl font-semibold mb-2">배송/교환 안내</h3>
+                        <ul class="list-disc pl-5">
+                            <li>배송비: ${priceKR(product.shipping)}원 (제주/도서 산간 추가)</li>
+                            <li>영업일 기준 1~3일 내 출고</li>
+                            <li>단순 변심 교환/반품은 수령 7일 이내 가능</li>
+                        </ul>
+                    </div>
+                `;
+            }
+        }
+
+        // 장바구니 버튼
+        function addToCart() {
+            const total = product.price * qty + product.shipping;
+            alert(
+                `장바구니 담기 완료!\n색상: ${colors.find((c) => c.id === color).label}\n수량: ${qty}\n결제 예상 금액: ₩${priceKR(total)}`
+            );
+        }
+
+        // 5. 초기화
+        document.addEventListener('DOMContentLoaded', updateDOM);
+
+    </script>
+</body>
+</html>
