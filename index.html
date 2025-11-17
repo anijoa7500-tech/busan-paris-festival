@@ -32,9 +32,14 @@
             height: 100%;
         }
 
-        /* Leaflet Map 컨테이너 배경색 설정 (옵션: 기본 OSM은 필요 없을 수 있음) */
+        /* Leaflet Map 컨테이너 배경색 설정 */
         #mapPreview .leaflet-container {
-            background-color: #e6e6e6; /* 밝은 배경색으로 변경, 지도 색상에 따라 조절 가능 */
+            background-color: #e6e6e6; 
+        }
+        
+        /* ⭐️ 저작권 문구 숨기기 (JavaScript에서도 처리했지만 혹시 몰라 CSS 추가) ⭐️ */
+        .leaflet-control-attribution {
+            display: none !important;
         }
     </style>
 </head>
@@ -246,7 +251,6 @@
         const L = window.L;
         const el = document.getElementById("mapPreview");
         
-        // 초기화 방지: Leaflet 라이브러리/컨테이너 없음 or 이미 초기화됨
         if (!L || !el || mapInitialized) {
             return;
         }
@@ -263,39 +267,32 @@
             mapInstance = L.map(el, { 
                 zoomControl: false, 
                 scrollWheelZoom: false 
-            }).setView([35.104, 128.966], 14); // 줌 레벨을 14로 조정하여 더 넓은 범위 표시
+            }).setView([35.104, 128.966], 15);
 
-            // 2. 🎨 OpenStreetMap 타일셋 적용 (컬러풀한 디테일 추가)
-            L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            // 2. 🛰️ Esri WorldImagery 타일셋 적용 (고화질 위성 사진 기반 디테일 극대화)
+            L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
+                // ⭐️ 어트리뷰션 (저작권 문구)을 빈 문자열로 설정하여 제거 ⭐️
+                attribution: '', 
                 maxZoom: 19,
-                detectRetina: true // 고해상도 디스플레이 지원
+                detectRetina: true
             }).addTo(mapInstance);
             
             // 3. 마커 추가 및 팝업 내용 디테일 추가
             L.marker([35.104, 128.966])
                 .addTo(mapInstance)
-                .bindPopup("<b>부산외국어대학교 글로컬크리에이터 하단팀</b><br>하단역 5번 출구 부근")
+                .bindPopup("<b>글로컬크리에이터 하단팀 거점</b><br>하단역 5번 출구 부근")
                 .openPopup();
             
             
-            // 4. ⭐️ 최종 안정화 로직: MutationObserver 및 지연 호출 ⭐️
-            
-            // a) 최초 로드 시 1차 및 2차 지연 호출 (최대 1초 대기)
+            // 4. ⭐️ 최종 안정화 로직 유지 ⭐️
             mapInstance.whenReady(function() {
                 this.invalidateSize(true); 
-
-                // 500ms 후 다시 호출 (브라우저가 레이아웃 계산을 마칠 때까지 대기)
                 setTimeout(forceMapInvalidate, 500); 
-
-                // 혹시 모를 상황에 대비해 1초 후 최종 확인
                 setTimeout(forceMapInvalidate, 1000); 
             });
 
-            // b) MutationObserver를 사용하여 부모 DOM 구조 변화 감지 (Tailwind 클래스 적용 시 대응)
             mapContainerObserver = new MutationObserver((mutations) => {
                 mutations.forEach((mutation) => {
-                    // 속성 변화(클래스/스타일) 또는 자식 리스트 변화가 있을 때 재계산
                     if (mutation.type === 'attributes' || mutation.type === 'childList') {
                         forceMapInvalidate();
                     }
@@ -311,7 +308,6 @@
                 });
             }
             
-            // c) 윈도우 크기 변경 시에도 크기 재계산
             window.addEventListener('resize', forceMapInvalidate);
 
         } catch (err) {
@@ -326,10 +322,8 @@
         initializeMap();
     });
     
-    // 안전을 위해 window load 시점에도 다시 시도
     window.addEventListener('load', initializeMap);
     
-    // 페이지를 떠날 때 Observer 정리
     window.addEventListener('beforeunload', () => {
         if (mapContainerObserver) {
             mapContainerObserver.disconnect();
