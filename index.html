@@ -1,172 +1,268 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>글로컬크리에이터 중단팀</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>광역 지식 패널 스타일</title>
+    <style>
+        /* 기본 스타일 초기화 */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #ffffff;
+            color: #202124;
+            display: flex; /* 컨테이너 중앙 정렬을 위해 body에 flex 적용 */
+            justify-content: center;
+        }
 
-  <!-- Leaflet map CSS -->
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-  />
+        /* 전체 콘텐츠 컨테이너 */
+        .page-container {
+            width: 100%;
+            max-width: 1200px; /* 구글 검색 결과와 유사한 최대 너비 */
+            padding: 0 20px; /* 좌우 패딩 */
+        }
 
-  <style>
-    body {
-      margin: 0;
-      background: #202124;
-      color: #e8eaed;
-      font-family: Arial, sans-serif;
-    }
+        /* 가상의 검색바 영역 (상단) */
+        .search-bar-placeholder {
+            height: 60px;
+            border-bottom: 1px solid #ebebeb;
+            margin-bottom: 20px;
+            /* 실제 구글 검색바처럼 좌우에 여백을 줍니다 */
+            padding: 0 0px; 
+            display: flex;
+            align-items: center;
+            font-size: 24px;
+            color: #3c4043;
+        }
+        .search-bar-placeholder::before {
+            content: 'Google';
+            color: #4285f4;
+            font-weight: bold;
+            font-style: italic;
+            margin-right: 15px;
+        }
 
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 20px;
-    }
+        /* 지식 패널 영역 (가장 큰 박스) */
+        .knowledge-panel-wide {
+            max-width: 1000px; /* 메인 콘텐츠의 최대 너비를 넓게 설정 */
+            margin: 0 auto 30px auto;
+            /* 테두리나 그림자 없이 배경색만으로 자연스럽게 보이게 처리 */
+        }
 
-    .top-section {
-      display: grid;
-      grid-template-columns: 1fr 350px;
-      gap: 20px;
-    }
+        /* 패널 헤더 (제목, 설명) */
+        .panel-header {
+            margin-bottom: 10px;
+        }
 
-    .big-image {
-      width: 100%;
-      height: 320px;
-      border-radius: 12px;
-      object-fit: cover;
-    }
+        .panel-title {
+            font-size: 32px;
+            font-weight: 400;
+            margin: 0 0 8px 0;
+            color: #202124;
+        }
 
-    .map-box {
-      height: 180px;
-      border-radius: 12px;
-      overflow: hidden;
-    }
+        .panel-subtitle {
+            font-size: 14px;
+            color: #70757a;
+            margin-bottom: 20px;
+        }
+        
+        /* 이미지 및 지도/사이드바 컨테이너 */
+        .media-and-sidebar {
+            display: flex;
+            gap: 20px; /* 요소 간의 간격 */
+        }
 
-    .right-small-img {
-      width: 100%;
-      height: 120px;
-      border-radius: 12px;
-      object-fit: cover;
-      margin-top: 12px;
-    }
+        /* 메인 이미지 영역 (좌측/중앙) */
+        .main-media {
+            flex: 1; /* 남은 공간을 대부분 차지 */
+            min-width: 60%; 
+        }
 
-    .section-box {
-      background: #303134;
-      padding: 16px;
-      border-radius: 12px;
-      margin-top: 20px;
-    }
+        .panel-image {
+            width: 100%;
+            height: auto;
+            max-height: 400px; /* 최대 높이 지정 */
+            object-fit: cover;
+            border-radius: 8px; /* 둥근 모서리 */
+        }
 
-    .grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-    }
+        /* 사이드바 영역 (지도, 날씨 등 - 우측) */
+        .sidebar {
+            width: 300px; /* 지도의 고정 너비 */
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
 
-    /* 검색결과 리스트 */
-    .search-results li {
-      border-bottom: 1px solid #444;
-      padding: 12px 0;
-      list-style: none;
-    }
+        .map-placeholder {
+            width: 100%;
+            height: 200px;
+            background-color: #e0e0e0;
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 14px;
+            color: #5f6368;
+            border: 1px solid #dadce0;
+        }
 
-    .search-results a {
-      color: #8ab4f8;
-      font-size: 18px;
-      text-decoration: none;
-    }
+        .weather-panel {
+            padding: 15px;
+            border: 1px solid #dadce0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
 
-    .search-results a:hover {
-      text-decoration: underline;
-    }
-  </style>
+        /* 정보 섹션 (기본 정보, 핵심 정보 등) */
+        .info-section {
+            display: flex;
+            flex-wrap: wrap; /* 내용이 넘칠 경우 줄바꿈 */
+            gap: 40px;
+            margin-top: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #dadce0;
+        }
+
+        .section-item {
+            max-width: 45%;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 500;
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+
+        .section-text {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #3c4043;
+        }
+        
+        /* 일반 검색 결과 영역 (패널 아래) */
+        .search-results-area {
+            max-width: 700px; /* 일반 검색 결과의 너비 */
+            margin-top: 30px;
+        }
+
+        .result-item {
+            margin-bottom: 25px;
+        }
+
+        .result-item h3 {
+            font-size: 20px;
+            margin: 0 0 5px 0;
+            color: #1a0dab; /* 링크 색상 */
+            font-weight: 400;
+        }
+
+        .result-url {
+            color: #006621;
+            font-size: 14px;
+        }
+        
+        /* 반응형 디자인 */
+        @media (max-width: 800px) {
+            .page-container {
+                padding: 0 10px;
+            }
+            .media-and-sidebar {
+                flex-direction: column; /* 모바일에서 위아래로 쌓이게 */
+            }
+            .sidebar {
+                width: 100%;
+                order: -1; /* 사이드바(지도)를 상단으로 이동 */
+            }
+            .main-media {
+                min-width: 100%;
+            }
+            .info-section {
+                flex-direction: column;
+                gap: 20px;
+            }
+            .section-item {
+                max-width: 100%;
+            }
+        }
+    </style>
 </head>
-
 <body>
-  <div class="container">
 
-    <!-- 상단 제목 -->
-    <h1 style="font-size:32px; margin:0;">글로컬크리에이터 중단팀</h1>
-    <div style="color:#9aa0a6; margin-bottom:20px;">
-      부산광역시 금정구 금샘로 485번길 65
+    <div class="page-container">
+        <div class="search-bar-placeholder">
+             부산외국어대학교 글로벌크리에이터 하단
+        </div>
+
+        <div class="knowledge-panel-wide">
+            
+            <div class="panel-header">
+                <h1 class="panel-title">글로벌크리에이터 중단팀</h1>
+                <div class="panel-subtitle">부산광역시 금정구 금샘로 485번길 65</div>
+            </div>
+
+            <div class="media-and-sidebar">
+                <div class="main-media">
+                                        <img src="https://via.placeholder.com/700x400?text=Representative+Photo" alt="대표 이미지" class="panel-image">
+                </div>
+
+                <div class="sidebar">
+                    <div class="map-placeholder">
+                        지도 플레이스홀더 (Map Placeholder)
+                        <br>OpenStreetMap / Google Maps 스타일
+                    </div>
+                    <div class="weather-panel">
+                        <strong>날씨</strong>
+                        <div style="display: flex; justify-content: space-between; margin-top: 8px;">
+                            <span>오늘</span><span>17°</span>
+                            <span>화</span><span>19°</span>
+                            <span>수</span><span>19°</span>
+                            <span>목</span><span>19°</span>
+                        </div>
+                        <p style="font-size: 12px; margin-top: 8px; color: #70757a;">에디터뉴스</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-section">
+                <div class="section-item">
+                    <h2 class="section-title">기본 정보</h2>
+                    <p class="section-text">
+                        부산 하단동이 단순히 경유지가 아닌, 외국인 관광객이 '머물고, 소비하고 싶은' 목적지가 되기 위한 글로벌 크리에이터의 핵심 전략은 하단이 가진 독특한 자원을 '한숨 간 시간'에 맞춘 매력적인 체험으로 바꾸는 것입니다.
+                    </p>
+                </div>
+                
+                <div class="section-item">
+                    <h2 class="section-title">하단 지역 핵심 자료</h2>
+                    <ul class="section-text" style="list-style: disc; margin-left: 15px; padding: 0;">
+                        <li><strong>주요 자원:</strong> 을숙도, 동아대, 낙동강하구둑 (3大 랜드마크)</li>
+                        <li><strong>콘텐츠 접근성:</strong> 부산 유일의 '강-바다' 접점 더블 역세권</li>
+                        <li><strong>잠재력:</strong> 글로벌 로컬 콘텐츠 테스트베드(Testbed)</li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="search-results-area">
+            <p style="color: #70757a; font-size: 14px;">약 6개 결과</p>
+            
+            <div class="result-item">
+                <div class="result-url">glocal-hd.com/product/s/...</div>
+                <h3>[부산한정] NFC 비누비누 베이비 케링 - GLOCAL-HD</h3>
+                <p>
+                    <span style="color: #fbbc05;">★★★★★</span> 4.9 (1,482건의 리뷰)
+                </p>
+                <p class="section-text">
+                    사하구 하단 문화거리에서 열리는 프렌치 마르쉐 &amp; 공연 축제입니다. 부산외국어대학교 글로벌 크리에이터 하단 팀이 함께하는 프로젝트로, 일정/프로그램/지도 정보를 아는 한 확인할 수 있습니다.
+                </p>
+            </div>
+            
+            </div>
     </div>
 
-    <!-- 상단 메인 영역 -->
-    <div class="top-section">
-
-      <!-- 왼쪽 큰 이미지 -->
-      <img
-        src="https://postfiles.pstatic.net/MjAyNTExMTFfMTY1/MDAxNzYyODM0NjE3MTc1.PNG"
-        class="big-image"
-        alt="대표 이미지"
-      />
-
-      <!-- 지도 + 오른쪽 작은 이미지 -->
-      <div>
-        <div id="map" class="map-box"></div>
-
-        <img
-          src="https://postfiles.pstatic.net/MjAyNTExMTFfMzkg/MDAxNzYyODMzNTk1MTA1.PNG"
-          class="right-small-img"
-          alt="작은 이미지"
-        />
-      </div>
-
-    </div>
-
-    <!-- 기본현황 / 핵심지표 -->
-    <div class="grid-2">
-      <div class="section-box">
-        <h3 style="margin-top:0;">기본현황</h3>
-        <p>
-          부산 하단동이 단순 경유지가 아닌, 외국인 관광객이 ‘머물고 소비하고 싶은’ 도시가 되기 위한 전략은 하단이 가진 자원을
-          ‘환승 시간 체험’으로 바꾸는 것에 있다.
-        </p>
-      </div>
-
-      <div class="section-box">
-        <h3 style="margin-top:0;">하단 지역 핵심지표</h3>
-        <p><b>주요 자원</b>: 을숙도, 동아대, 낙동강하구둑</p>
-        <p><b>콘텐츠 접근성</b>: 부산 유일 ‘강-바다’ 접점 더블 역세권</p>
-        <p><b>잠재력</b>: 글로벌 로컬 콘텐츠 테스트베드(Testbed)</p>
-      </div>
-    </div>
-
-    <!-- 검색결과 -->
-    <div class="section-box" style="margin-top:30px;">
-      <div style="color:#9aa0a6;">약 6개 결과</div>
-      <ul class="search-results">
-        <li>
-          <a href="#">[부산한정] NFC 비누비누 베이베 키링 · GLOCAL:HD</a>
-          <div style="color:#ccc;">★ 4.9 (1482)</div>
-        </li>
-        <li>
-          <a href="#">하단 숙박/체험 로컬 여행 상품 리스트</a>
-          <div style="color:#ccc;">★ 4.6 (524)</div>
-        </li>
-        <li>
-          <a href="#">부산 파리 마르쉐 · 공식 안내</a>
-          <div style="color:#ccc;">★ 4.7 (861)</div>
-        </li>
-        <li>
-          <a href="#">하단 재즈 나잇 · 공연 라인업</a>
-          <div style="color:#ccc;">★ 4.8 (1023)</div>
-        </li>
-      </ul>
-    </div>
-  </div>
-
-  <!-- Leaflet map script -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-  <script>
-    const map = L.map("map").setView([35.104, 128.966], 13);
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: "© OpenStreetMap",
-    }).addTo(map);
-    L.marker([35.104, 128.966]).addTo(map).bindPopup("하단역");
-  </script>
 </body>
 </html>
