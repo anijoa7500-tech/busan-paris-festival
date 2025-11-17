@@ -1,729 +1,734 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Google 스타일 검색 미리보기 클론</title>
-        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
-    
-    <style>
-        /* 기본 색상 및 폰트 */
-        :root {
-            --bg-primary: #202124; /* 전체 배경 */
-            --bg-secondary: #303134; /* 내부 박스 배경 */
-            --text-primary: #e8eaed; /* 기본 텍스트 (밝은 흰색) */
-            --text-secondary: #bdc1c6; /* 본문 텍스트 */
-            --text-tertiary: #9aa0a6; /* 보조/약한 텍스트 */
-            --link-color: #8ab4f8; /* 링크 색상 (밝은 파란색) */
-            --google-blue: #4285f4;
-        }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google 스타일 검색 미리보기 클론</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+    
+    <style>
+        /* 기본 색상 및 폰트 */
+        :root {
+            --bg-primary: #202124; /* 전체 배경 */
+            --bg-secondary: #303134; /* 내부 박스 배경 */
+            --text-primary: #e8eaed; /* 기본 텍스트 (밝은 흰색) */
+            --text-secondary: #bdc1c6; /* 본문 텍스트 */
+            --text-tertiary: #9aa0a6; /* 보조/약한 텍스트 */
+            --link-color: #8ab4f8; /* 링크 색상 (밝은 파란색) */
+            --google-blue: #4285f4;
+        }
 
-        /* 스크롤바 숨기기 (Tailwind no-scrollbar 대체) */
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        /* 스크롤바 숨기기 (Tailwind no-scrollbar 대체) */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: var(--bg-primary);
-            color: var(--text-primary);
-            min-height: 100vh;
-            overflow-y: scroll;
-        }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-y: scroll;
+        }
 
-        /* 컨테이너 및 레이아웃 */
-        .page-container {
-            max-width: 1200px; /* max-w-7xl mx-auto */
-            margin: 0 auto;
-            padding: 0 16px; /* px-4 */
-        }
+        /* 컨테이너 및 레이아웃 */
+        .page-container {
+            max-width: 1200px; /* max-w-7xl mx-auto */
+            margin: 0 auto;
+            padding: 0 16px; /* px-4 */
+        }
 
-        header {
-            width: 100%;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            position: sticky;
-            top: 0;
-            z-index: 40;
-            background-color: rgba(32, 33, 36, 0.8); /* bg-[#202124]/80 */
-            backdrop-filter: blur(5px);
-        }
+        header {
+            width: 100%;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            background-color: rgba(32, 33, 36, 0.8); /* bg-[#202124]/80 */
+            backdrop-filter: blur(5px);
+        }
 
-        .header-content {
-            padding: 12px 16px; /* py-3 px-4 */
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
+        .header-content {
+            padding: 12px 16px; /* py-3 px-4 */
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
 
-        .logo {
-            font-size: 24px;
-            font-weight: bold;
-            letter-spacing: -0.025em;
-        }
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            letter-spacing: -0.025em;
+        }
 
-        .logo span {
-            color: var(--link-color);
-        }
+        .logo span {
+            color: var(--link-color);
+        }
 
-        /* 검색 폼 스타일 */
-        .search-form {
-            flex: 1;
-        }
+        /* 검색 폼 스타일 */
+        .search-form {
+            flex: 1;
+        }
 
-        .search-input-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background-color: var(--bg-secondary);
-            border-radius: 9999px;
-            padding: 8px 8px 8px 16px; /* pl-4 pr-2 py-2 */
-            border: 1px solid transparent;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            transition: border-color 0.2s;
-        }
+        .search-input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background-color: var(--bg-secondary);
+            border-radius: 9999px;
+            padding: 8px 8px 8px 16px; /* pl-4 pr-2 py-2 */
+            border: 1px solid transparent;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: border-color 0.2s;
+        }
 
-        .search-input-wrapper:focus-within {
-            border-color: rgba(255, 255, 255, 0.2);
-        }
+        .search-input-wrapper:focus-within {
+            border-color: rgba(255, 255, 255, 0.2);
+        }
 
-        .search-input-wrapper input {
-            flex: 1;
-            background-color: transparent;
-            outline: none;
-            border: none;
-            color: var(--text-primary);
-            font-size: 14px;
-        }
-        
-        .search-input-wrapper input::placeholder {
-            color: var(--text-tertiary);
-        }
+        .search-input-wrapper input {
+            flex: 1;
+            background-color: transparent;
+            outline: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+        
+        .search-input-wrapper input::placeholder {
+            color: var(--text-tertiary);
+        }
 
-        .search-button {
-            padding: 6px 16px; /* px-4 py-1.5 */
-            background-color: var(--link-color);
-            color: var(--bg-primary);
-            border-radius: 9999px;
-            font-size: 14px;
-            font-weight: 600;
-            border: none;
-            cursor: pointer;
-            transition: brightness 0.1s;
-        }
+        .search-button {
+            padding: 6px 16px; /* px-4 py-1.5 */
+            background-color: var(--link-color);
+            color: var(--bg-primary);
+            border-radius: 9999px;
+            font-size: 14px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: brightness 0.1s;
+        }
 
-        .search-button:hover {
-            filter: brightness(0.95);
-        }
+        .search-button:hover {
+            filter: brightness(0.95);
+        }
 
-        /* 메인 콘텐츠 레이아웃 */
-        main {
-            padding-top: 24px; /* pt-6 */
-            display: grid;
-            grid-template-columns: 1fr; /* 모바일 기본: 단일 컬럼 */
-            gap: 32px; /* gap-8 */
-        }
+        /* 메인 콘텐츠 레이아웃 */
+        main {
+            padding-top: 24px; /* pt-6 */
+            display: grid;
+            grid-template-columns: 1fr; /* 모바일 기본: 단일 컬럼 */
+            gap: 32px; /* gap-8 */
+        }
 
-        @media (min-width: 1024px) { /* lg */
-            main {
-                grid-template-columns: minmax(0, 1fr) 360px; /* lg:grid-cols-[minmax(0,1fr)_360px] */
-            }
-        }
+        @media (min-width: 1024px) { /* lg */
+            main {
+                grid-template-columns: minmax(0, 1fr) 360px; /* lg:grid-cols-[minmax(0,1fr)_360px] */
+            }
+        }
 
-        /* 지식 패널 섹션 (상단) */
-        .knowledge-panel-section {
-            grid-column: 1 / -1; /* col-span-full (전체 너비) */
-        }
-        
-        .panel-title-group {
-            margin-bottom: 12px;
-        }
+        /* 지식 패널 섹션 (상단) */
+        .knowledge-panel-section {
+            grid-column: 1 / -1; /* col-span-full (전체 너비) */
+        }
+        
+        .panel-title-group {
+            margin-bottom: 12px;
+        }
 
-        .panel-title {
-            font-size: 28px; /* md:text-[28px] */
-            font-weight: 600;
-            letter-spacing: -0.025em;
-            color: var(--text-primary);
-        }
+        .panel-title {
+            font-size: 28px; /* md:text-[28px] */
+            font-weight: 600;
+            letter-spacing: -0.025em;
+            color: var(--text-primary);
+        }
 
-        .panel-address {
-            font-size: 14px;
-            color: var(--text-tertiary);
-            margin-top: 4px;
-        }
-        
-        /* 이미지 및 사이드바 Grid */
-        .media-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 16px;
-        }
+        .panel-address {
+            font-size: 14px;
+            color: var(--text-tertiary);
+            margin-top: 4px;
+        }
+        
+        /* 이미지 및 사이드바 Grid */
+        .media-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
 
-        @media (min-width: 1024px) { /* lg */
-            .media-grid {
-                grid-template-columns: minmax(0, 1fr) 360px; /* lg:grid-cols-[minmax(0,1fr)_360px] */
-            }
-        }
+        @media (min-width: 1024px) { /* lg */
+            .media-grid {
+                grid-template-columns: minmax(0, 1fr) 360px; /* lg:grid-cols-[minmax(0,1fr)_360px] */
+            }
+        }
 
-        /* 메인 이미지 */
-        .main-image-wrapper {
-            position: relative;
-            border-radius: 16px;
-            overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            background-color: var(--bg-secondary);
-        }
+        /* 메인 이미지 */
+        .main-image-wrapper {
+            position: relative;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background-color: var(--bg-secondary);
+        }
 
-        .main-image-wrapper img {
-            width: 100%;
-            height: 260px; /* h-[260px] */
-            object-fit: cover;
-        }
+        .main-image-wrapper img {
+            width: 100%;
+            height: 260px; /* h-[260px] */
+            object-fit: cover;
+        }
 
-        @media (min-width: 768px) { /* md */
-            .main-image-wrapper img {
-                height: 360px; /* md:h-[360px] */
-            }
-        }
+        @media (min-width: 768px) { /* md */
+            .main-image-wrapper img {
+                height: 360px; /* md:h-[360px] */
+            }
+        }
 
-        .image-nav-buttons {
-            position: absolute;
-            bottom: 12px;
-            right: 12px;
-            display: flex;
-            gap: 8px;
-        }
+        .image-nav-buttons {
+            position: absolute;
+            bottom: 12px;
+            right: 12px;
+            display: flex;
+            gap: 8px;
+        }
 
-        .image-nav-buttons button {
-            width: 32px;
-            height: 32px;
-            display: grid;
-            place-items: center;
-            border-radius: 9999px;
-            background-color: rgba(0, 0, 0, 0.6);
-            color: white;
-            font-size: 14px;
-            border: none;
-            cursor: pointer;
-        }
+        .image-nav-buttons button {
+            width: 32px;
+            height: 32px;
+            display: grid;
+            place-items: center;
+            border-radius: 9999px;
+            background-color: rgba(0, 0, 0, 0.6);
+            color: white;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+        }
 
-        /* 지도 및 날씨/작은 이미지 영역 */
-        .side-panels-grid {
-            display: grid;
-            gap: 16px;
-        }
+        /* 지도 및 날씨/작은 이미지 영역 */
+        .side-panels-grid {
+            display: grid;
+            gap: 16px;
+        }
 
-        .map-wrapper {
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            background-color: #1f2023;
-            height: 180px;
-            position: relative;
-            overflow: hidden;
-        }
+        .map-wrapper {
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background-color: #1f2023;
+            height: 180px;
+            position: relative;
+            overflow: hidden;
+        }
 
-        #mapPreview {
-            position: absolute;
-            inset: 0;
-        }
+        #mapPreview {
+            position: absolute;
+            inset: 0;
+        }
 
-        .weather-small-grid {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 16px;
-        }
-        
-        .panel-box {
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            background-color: var(--bg-secondary);
-            padding: 16px;
-        }
+        .weather-small-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+        }
+        
+        .panel-box {
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background-color: var(--bg-secondary);
+            padding: 16px;
+        }
 
-        .weather-panel div:first-child {
-            color: var(--text-tertiary);
-            margin-bottom: 8px;
-            font-size: 14px;
-        }
+        .weather-panel div:first-child {
+            color: var(--text-tertiary);
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
 
-        .weather-details {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
+        .weather-details {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
 
-        .weather-day {
-            text-align: center;
-        }
+        .weather-day {
+            text-align: center;
+        }
 
-        .weather-day div:first-child {
-            font-size: 12px;
-            color: var(--text-tertiary);
-        }
-        
-        .weather-day div:last-child {
-            font-size: 16px;
-        }
+        .weather-day div:first-child {
+            font-size: 12px;
+            color: var(--text-tertiary);
+        }
+        
+        .weather-day div:last-child {
+            font-size: 16px;
+        }
 
-        .weather-link {
-            margin-top: 8px;
-            display: inline-block;
-            font-size: 12px;
-            color: var(--link-color);
-            text-decoration: none;
-        }
+        .weather-link {
+            margin-top: 8px;
+            display: inline-block;
+            font-size: 12px;
+            color: var(--link-color);
+            text-decoration: none;
+        }
 
-        .small-image-box {
-            overflow: hidden;
-            background-color: var(--bg-secondary);
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
+        .small-image-box {
+            overflow: hidden;
+            background-color: var(--bg-secondary);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
 
-        .small-image-box img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+        .small-image-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
 
-        /* 하단 정보 섹션 */
-        .info-panels-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 16px;
-            margin-top: 16px;
-        }
+        /* 하단 정보 섹션 */
+        .info-panels-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            margin-top: 16px;
+        }
 
-        @media (min-width: 1024px) { /* lg */
-            .info-panels-grid {
-                grid-template-columns: repeat(2, minmax(0, 1fr)); /* lg:grid-cols-2 */
-            }
-        }
-        
-        .info-panel-title {
-            color: var(--text-primary);
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
+        @media (min-width: 1024px) { /* lg */
+            .info-panels-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr)); /* lg:grid-cols-2 */
+            }
+        }
+        
+        .info-panel-title {
+            color: var(--text-primary);
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
 
-        .info-panel-text {
-            color: var(--text-secondary);
-            line-height: 1.625;
-            font-size: 15px;
-        }
-        
-        .key-data-list {
-            display: grid;
-            grid-template-columns: 120px minmax(0, 1fr);
-            gap: 8px 0;
-        }
+        .info-panel-text {
+            color: var(--text-secondary);
+            line-height: 1.625;
+            font-size: 15px;
+        }
+        
+        .key-data-list {
+            display: grid;
+            grid-template-columns: 120px minmax(0, 1fr);
+            gap: 8px 0;
+        }
 
-        .key-data-list dt {
-            color: var(--text-tertiary);
-        }
+        .key-data-list dt {
+            color: var(--text-tertiary);
+        }
 
-        .key-data-list dd {
-            color: var(--text-primary);
-        }
+        .key-data-list dd {
+            color: var(--text-primary);
+        }
 
 
-        /* 검색 결과 목록 (좌측 메인 컬럼) */
-        .search-results-section {
-            /* 검색 결과는 lg에서 1번 컬럼에 위치 */
-        }
-        
-        .results-count {
-            font-size: 14px;
-            color: var(--text-tertiary);
-            margin-bottom: 12px;
-        }
-        
-        .results-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            gap: 24px; /* space-y-6 */
-        }
+        /* 검색 결과 목록 (좌측 메인 컬럼) */
+        .search-results-section {
+            /* 검색 결과는 lg에서 1번 컬럼에 위치 */
+        }
+        
+        .results-count {
+            font-size: 14px;
+            color: var(--text-tertiary);
+            margin-bottom: 12px;
+        }
+        
+        .results-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 24px; /* space-y-6 */
+        }
 
-        .result-item {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            padding-bottom: 16px;
-        }
+        .result-item {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 16px;
+        }
 
-        .result-display-url {
-            font-size: 12px;
-            color: var(--text-tertiary);
-            margin-bottom: 4px;
-        }
+        .result-display-url {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            margin-bottom: 4px;
+        }
 
-        .result-title-link {
-            text-decoration: none;
-            display: block;
-        }
+        .result-title-link {
+            text-decoration: none;
+            display: block;
+        }
 
-        .result-title {
-            font-size: 20px; /* md:text-xl */
-            line-height: 1.375;
-            color: var(--link-color);
-            transition: underline 0.1s;
-        }
+        .result-title {
+            font-size: 20px; /* md:text-xl */
+            line-height: 1.375;
+            color: var(--link-color);
+            transition: underline 0.1s;
+        }
 
-        .result-title:hover {
-            text-decoration: underline;
-        }
+        .result-title:hover {
+            text-decoration: underline;
+        }
 
-        .result-meta {
-            margin-top: 4px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 14px;
-            color: var(--text-primary);
-        }
+        .result-meta {
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: var(--text-primary);
+        }
 
-        .result-rating {
-            font-weight: 600;
-        }
+        .result-rating {
+            font-weight: 600;
+        }
 
-        .result-reviews {
-            color: var(--text-tertiary);
-        }
+        .result-reviews {
+            color: var(--text-tertiary);
+        }
 
-        .result-snippet {
-            margin-top: 4px;
-            color: var(--text-secondary);
-            line-height: 1.625;
-        }
-        
-        /* 오른쪽 사이드바 (스몰 패널) */
-        .aside-panel {
-            display: none; /* hidden */
-        }
+        .result-snippet {
+            margin-top: 4px;
+            color: var(--text-secondary);
+            line-height: 1.625;
+        }
+        
+        /* 오른쪽 사이드바 (스몰 패널) */
+        .aside-panel {
+            display: none; /* hidden */
+        }
 
-        @media (min-width: 1024px) { /* lg */
-            .aside-panel {
-                display: block;
-                position: sticky;
-                top: 76px; /* lg:sticky lg:top-[76px] */
-                height: fit-content;
-            }
-        }
+        @media (min-width: 1024px) { /* lg */
+            .aside-panel {
+                display: block;
+                position: sticky;
+                top: 76px; /* lg:sticky lg:top-[76px] */
+                height: fit-content;
+            }
+        }
 
-        .aside-panel-box {
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            background-color: var(--bg-secondary);
-            overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
+        .aside-panel-box {
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background-color: var(--bg-secondary);
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
 
-        .aside-panel-box img {
-            width: 100%;
-            aspect-ratio: 1 / 1;
-            object-fit: cover;
-        }
+        .aside-panel-box img {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+        }
 
-        .aside-panel-content {
-            padding: 16px;
-        }
+        .aside-panel-content {
+            padding: 16px;
+        }
 
-        .aside-panel-content div:first-child {
-            font-size: 14px;
-            color: var(--text-tertiary);
-            margin-bottom: 4px;
-        }
+        .aside-panel-content div:first-child {
+            font-size: 14px;
+            color: var(--text-tertiary);
+            margin-bottom: 4px;
+        }
 
-        .aside-panel-content div:nth-child(2) {
-            font-size: 16px;
-            color: var(--text-primary);
-            font-weight: 600;
-        }
+        .aside-panel-content div:nth-child(2) {
+            font-size: 16px;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
 
-        .aside-panel-content a {
-            margin-top: 8px;
-            display: inline-block;
-            color: var(--link-color);
-            font-size: 14px;
-            text-decoration: none;
-        }
+        .aside-panel-content a {
+            margin-top: 8px;
+            display: inline-block;
+            color: var(--link-color);
+            font-size: 14px;
+            text-decoration: none;
+        }
 
-        .aside-panel-content a:hover {
-            text-decoration: underline;
-        }
-        
-        /* 푸터 */
-        footer {
-            max-width: 1200px;
-            margin: 40px auto 0;
-            padding: 24px 16px;
-            font-size: 12px;
-            color: var(--text-tertiary);
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
+        .aside-panel-content a:hover {
+            text-decoration: underline;
+        }
+        
+        /* 푸터 */
+        footer {
+            max-width: 1200px;
+            margin: 40px auto 0;
+            padding: 24px 16px;
+            font-size: 12px;
+            color: var(--text-tertiary);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
 
-        .footer-content {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: 16px;
-        }
+        .footer-content {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 16px;
+        }
 
-        .footer-content span:nth-child(2) {
-            color: #5f6368;
-        }
-    </style>
+        .footer-content span:nth-child(2) {
+            color: #5f6368;
+        }
+    </style>
 </head>
 <body class="no-scrollbar">
 
-    <div class="page-container">
-        <header>
-            <div class="header-content">
-                <div class="logo">Goo<span>gle</span></div>
-                <form class="search-form" onsubmit="event.preventDefault(); submitSearch();">
-                    <div class="search-input-wrapper">
-                        <span style="color: var(--text-tertiary); font-size: 14px;">🔎</span>
-                        <input id="searchInput" type="text" value="부산외국어대학교 글로컬크리에이터 하단" placeholder="검색 또는 URL 입력">
-                        <button type="submit" class="search-button">Google 검색</button>
-                    </div>
-                </form>
-            </div>
-        </header>
+    <div class="page-container">
+        <header>
+            <div class="header-content">
+                <div class="logo">Goo<span>gle</span></div>
+                <form class="search-form" onsubmit="event.preventDefault(); submitSearch();">
+                    <div class="search-input-wrapper">
+                        <span style="color: var(--text-tertiary); font-size: 14px;">🔎</span>
+                        <input id="searchInput" type="text" value="부산외국어대학교 글로컬크리에이터 하단" placeholder="검색 또는 URL 입력">
+                        <button type="submit" class="search-button">Google 검색</button>
+                    </div>
+                </form>
+            </div>
+        </header>
 
-        <main>
-            <section class="knowledge-panel-section">
-                <div class="panel-title-group">
-                    <h1 class="panel-title">글로컬크리에어터 중단팀</h1>
-                    <div class="panel-address">부산광역시 금정구 금샘로 485번길 65</div>
-                </div>
+        <main>
+            <section class="knowledge-panel-section">
+                <div class="panel-title-group">
+                    <h1 class="panel-title">글로컬크리에어터 중단팀</h1>
+                    <div class="panel-address">부산광역시 금정구 금샘로 485번길 65</div>
+                </div>
 
-                <div class="media-grid">
-                    <div class="main-image-wrapper">
-                        
-                        <img src="https://postfiles.pstatic.net/MjAyNTExMTFfMTY1/MDAxNzYyODM0NjE3MTc1.1ap22VNgJtNmgu-dEu9jssTbYQo87gikRbcGLhYSCiUg.XiJpPPisKcO0rTuG5fN44BaDJlb07OrNTAibATpFZtkg.PNG/Gemini_Generated_Image_px7fb9px7fb9px7f.png?type=w580" alt="자갈치시장 (부산)" loading="lazy" />
-                        <div class="image-nav-buttons">
-                            <button>‹</button>
-                            <button>›</button>
-                        </div>
-                    </div>
+                <div class="media-grid">
+                    <div class="main-image-wrapper">
+                        
+                        <img src="https://postfiles.pstatic.net/MjAyNTExMTFfMTY1/MDAxNzYyODM0NjE3MTc1.1ap22VNgJtNmgu-dEu9jssTbYQo87gikRbcGLhYSCiUg.XiJpPPisKcO0rTuG5fN44BaDJlb07OrNTAibATpFZtkg.PNG/Gemini_Generated_Image_px7fb9px7fb9px7f.png?type=w580" alt="자갈치시장 (부산)" loading="lazy" />
+                        <div class="image-nav-buttons">
+                            <button>‹</button>
+                            <button>›</button>
+                        </div>
+                    </div>
 
-                    <div class="side-panels-grid">
-                        <div class="map-wrapper">
-                            <div id="mapPreview"></div>
-                        </div>
+                    <div class="side-panels-grid">
+                        <div class="map-wrapper">
+                            <div id="mapPreview"></div>
+                        </div>
 
-                        <div class="weather-small-grid">
-                            <div class="panel-box weather-panel">
-                                <div>날씨</div>
-                                <div class="weather-details">
-                                    <div class="weather-day"><div style="color: var(--text-tertiary);">화</div><div>☀️ 17°</div></div>
-                                    <div class="weather-day"><div style="color: var(--text-tertiary);">수</div><div>☀️ 19°</div></div>
-                                    <div class="weather-day"><div style="color: var(--text-tertiary);">목</div><div>☀️ 19°</div></div>
-                                </div>
-                                <a class="weather-link" href="#">웨더뉴스</a>
-                            </div>
-                            <div class="small-image-box">
-                                
-                                <img src="https://www.busan.com/nas/data/content/image/2015/02/16/20150216000102_0.jpg" alt="부산광역시 전경" loading="lazy" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                        <div class="weather-small-grid">
+                            <div class="panel-box weather-panel">
+                                <div>날씨</div>
+                                <div class="weather-details">
+                                    <div class="weather-day"><div style="color: var(--text-tertiary);">화</div><div>☀️ 17°</div></div>
+                                    <div class="weather-day"><div style="color: var(--text-tertiary);">수</div><div>☀️ 19°</div></div>
+                                    <div class="weather-day"><div style="color: var(--text-tertiary);">목</div><div>☀️ 19°</div></div>
+                                </div>
+                                <a class="weather-link" href="#">웨더뉴스</a>
+                            </div>
+                            <div class="small-image-box">
+                                
+                                <img src="https://www.busan.com/nas/data/content/image/2015/02/16/20150216000102_0.jpg" alt="부산광역시 전경" loading="lazy" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-                <div class="info-panels-grid">
-                    <div class="panel-box">
-                        <div class="info-panel-title">기본현황</div>
-                        <p class="info-panel-text">
-                            부산 하단동이 단순히 경유지가 아닌, 외국인 관광객이 '머물고, 소비하고 싶은' 목적지가 되기 위한 글로컬 크리에이터의 핵심 전략은 하단이 가진 독특한 자원을 '환승 시간'에 맞춘 매력적인 체험으로 바꾸는 것입니다.
-                        </p>
-                    </div>
-                    <div class="panel-box">
-                        <div class="info-panel-title">하단 지역 핵심지표</div>
-                        <dl class="key-data-list">
-                            <dt>주요 자원</dt><dd>을숙도, 동아대, 낙동강하구둑 (3大 랜드마크)</dd>
-                            <dt>콘텐츠 접근성</dt><dd>부산 유일의 '강-바다' 접점 더블 역세권</dd>
-                            <dt>잠재력</dt><dd>글로벌 로컬 콘텐츠 테스트베드(Testbed)</dd>
-                        </dl>
-                    </div>
-                </div>
-            </section>
+                <div class="info-panels-grid">
+                    <div class="panel-box">
+                        <div class="info-panel-title">기본현황</div>
+                        <p class="info-panel-text">
+                            부산 하단동이 단순히 경유지가 아닌, 외국인 관광객이 '머물고, 소비하고 싶은' 목적지가 되기 위한 글로컬 크리에이터의 핵심 전략은 하단이 가진 독특한 자원을 '환승 시간'에 맞춘 매력적인 체험으로 바꾸는 것입니다.
+                        </p>
+                    </div>
+                    <div class="panel-box">
+                        <div class="info-panel-title">하단 지역 핵심지표</div>
+                        <dl class="key-data-list">
+                            <dt>주요 자원</dt><dd>을숙도, 동아대, 낙동강하구둑 (3大 랜드마크)</dd>
+                            <dt>콘텐츠 접근성</dt><dd>부산 유일의 '강-바다' 접점 더블 역세권</dd>
+                            <dt>잠재력</dt><dd>글로벌 로컬 콘텐츠 테스트베드(Testbed)</dd>
+                        </dl>
+                    </div>
+                </div>
+            </section>
 
-            <section class="search-results-section">
-                <p id="resultsCount" class="results-count">약 6개 결과</p>
-                <ul id="resultsList" class="results-list">
-                    </ul>
-            </section>
+            <section class="search-results-section">
+                <p id="resultsCount" class="results-count">약 6개 결과</p>
+                <ul id="resultsList" class="results-list">
+                    </ul>
+            </section>
 
-            <aside class="aside-panel">
-                <div class="aside-panel-box">
-                    <a href="#" target="_blank" rel="noreferrer" class="block">
-                        
-                        <img src="https://postfiles.pstatic.net/MjAyNTExMTFfMzkg/MDAxNzYyODMzNTk1MTA1.Tgw94vuCud01GqJEllygmWJLI0DOuYCypY3EMvDfAckg.NjUIog0XiqSfIw0Ay0nEHSIolK5emHr9L4zjt6PtMaMg.PNG/rmfzm.png?type=w580" alt="글로컬 크리에이터" loading="lazy" />
-                    </a>
-                    <div class="aside-panel-content">
-                        <div>이름</div>
-                        <div class="text-base text-[#e8eaed] font-semibold">글로컬 크리에이터</div>
-                        <a href="#" target="_blank" rel="noreferrer">부산외국어대학교 : 박광우 교수</a>
-                    </div>
-                </div>
-            </aside>
-        </main>
+            <aside class="aside-panel">
+                <div class="aside-panel-box">
+                    <a href="#" target="_blank" rel="noreferrer" class="block">
+                        
+                        <img src="https://postfiles.pstatic.net/MjAyNTExMTFfMzkg/MDAxNzYyODMzNTk1MTA1.Tgw94vuCud01GqJEllygmWJLI0DOuYCypY3EMvDfAckg.NjUIog0XiqSfIw0Ay0nEHSIolK5emHr9L4zjt6PtMaMg.PNG/rmfzm.png?type=w580" alt="글로컬 크리에이터" loading="lazy" />
+                    </a>
+                    <div class="aside-panel-content">
+                        <div>이름</div>
+                        <div class="text-base text-[#e8eaed] font-semibold">글로컬 크리에이터</div>
+                        <a href="#" target="_blank" rel="noreferrer">부산외국어대학교 : 박광우 교수</a>
+                    </div>
+                </div>
+            </aside>
+        </main>
 
-        <footer>
-            <div class="footer-content">
-                <span>대한민국 · 부산 · 하단</span>
-                <span>·</span>
-                <span>이 미리보기는 학습·시연용 UI 클론입니다.</span>
-            </div>
-        </footer>
-    </div>
+        <footer>
+            <div class="footer-content">
+                <span>대한민국 · 부산 · 하단</span>
+                <span>·</span>
+                <span>이 미리보기는 학습·시연용 UI 클론입니다.</span>
+            </div>
+        </footer>
+    </div>
 
-    <script>
-        // 1. 검색 결과 데이터
-        const seedResults = [
-            {
-                title: "[부산한정] NFC 비누비누 베이베 키링 · GLOCAL:HD",
-                url: "https://glocal-hd.com/product/...",
-                displayUrl: "glocal-hd.com/product/...r",
-                snippet: "사하구 하단 문화의거리에서 열리는 프렌치 마르쉐 & 공연 축제입니다. 부산외국어대학교 글로컬 크리에이터 하단 팀이 함께하는 프로젝트로, 일정·프로그램·티켓·지도 정보를 한눈에 확인할 수 있습니다.",
-                rating: 4.9,
-                reviews: 1482,
-            },
-            {
-                title: "하단 숙박/체험 로컬 여행 상품 리스트 · 하단.음숙.다.대.허브",
-                url: "https://hadan-travelhub.co.kr",
-                displayUrl: "hadan.umsuk.daedae.heobeo",
-                snippet: "부산 사하구 하단 문화의거리 기반의 로컬 여행 상품 추천 목록입니다. K-인싸 투어, 1일 비누 만들기, 로컬 맛집 등 다양한 테마별 액티비티와 숙박 정보를 제공합니다.",
-                rating: 4.6,
-                reviews: 524,
-            },
-            {
-                title: "부산 파리 마르쉐 · 공식 안내(일정·오시는 길)",
-                url: "https://busan-parisfest.kr",
-                displayUrl: "busan-parisfest.kr",
-                snippet: "사하구 하단 문화의거리에서 열리는 프렌치 마르쉐 & 공연 축제입니다. 프랑스의 마르쉐와 카페 문화를 옮겨온 도시형 축제로, 디저트/치즈, 공연, 포토스팟을 즐길 수 있습니다. (일정: 2025. 12. 6(토) - 12. 7(일))",
-                rating: 4.7,
-                reviews: 861,
-            },
-            {
-                title: "하단 재즈 나잇 · 공연 라인업 및 타임테이블",
-                url: "https://hadanjazz.kr/lineup",
-                displayUrl: "hadanjazz.kr",
-                snippet: "하단역 일대에서 열리는 도심형 재즈 축제입니다. 국내외 재즈 아티스트, 게스트 세션 정보와 공연 시간표를 미리 만나보세요.",
-                rating: 4.8,
-                reviews: 1023,
-            },
-            {
-                title: "다대포 선셋 포토워크 · 참가자 모집(하단 출발)",
-                url: "https://www.dadaepo-sunset.com/walk",
-                displayUrl: "dadaepo-sunset.com",
-                snippet: "하단에서 출발해 다대포 해변 일몰 명소를 걷는 포토워크입니다. 촬영 포인트, 복장 가이드, 날씨 체크리스트를 참고해보세요.",
-                rating: 4.5,
-                reviews: 392,
-            },
-            {
-                title: "로컬 베이커리 위크 in 하단 · 참가 매장 안내",
-                url: "https://bakeryweek.kr/hadan",
-                displayUrl: "bakeryweek.kr",
-                snippet: "하단의 개성 있는 로컬 베이커리 20여 곳이 참여합니다. 시그니처 메뉴, 빵 굽는 시간, 스탬프 위치와 한정 굿즈 정보를 제공합니다.",
-                rating: 4.6,
-                reviews: 745,
-            },
-        ];
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 
-        let submittedQuery = "부산외국어대학교 글로컬크리에이터 하단"; // 초기 검색어
+    <script>
+        // 1. 검색 결과 데이터
+        const seedResults = [
+            {
+                title: "[부산한정] NFC 비누비누 베이베 키링 · GLOCAL:HD",
+                url: "https://glocal-hd.com/product/...",
+                displayUrl: "glocal-hd.com/product/...r",
+                snippet: "사하구 하단 문화의거리에서 열리는 프렌치 마르쉐 & 공연 축제입니다. 부산외국어대학교 글로컬 크리에이터 하단 팀이 함께하는 프로젝트로, 일정·프로그램·티켓·지도 정보를 한눈에 확인할 수 있습니다.",
+                rating: 4.9,
+                reviews: 1482,
+            },
+            {
+                title: "하단 숙박/체험 로컬 여행 상품 리스트 · 하단.음숙.다.대.허브",
+                url: "https://hadan-travelhub.co.kr",
+                displayUrl: "hadan.umsuk.daedae.heobeo",
+                snippet: "부산 사하구 하단 문화의거리 기반의 로컬 여행 상품 추천 목록입니다. K-인싸 투어, 1일 비누 만들기, 로컬 맛집 등 다양한 테마별 액티비티와 숙박 정보를 제공합니다.",
+                rating: 4.6,
+                reviews: 524,
+            },
+            {
+                title: "부산 파리 마르쉐 · 공식 안내(일정·오시는 길)",
+                url: "https://busan-parisfest.kr",
+                displayUrl: "busan-parisfest.kr",
+                snippet: "사하구 하단 문화의거리에서 열리는 프렌치 마르쉐 & 공연 축제입니다. 프랑스의 마르쉐와 카페 문화를 옮겨온 도시형 축제로, 디저트/치즈, 공연, 포토스팟을 즐길 수 있습니다. (일정: 2025. 12. 6(토) - 12. 7(일))",
+                rating: 4.7,
+                reviews: 861,
+            },
+            {
+                title: "하단 재즈 나잇 · 공연 라인업 및 타임테이블",
+                url: "https://hadanjazz.kr/lineup",
+                displayUrl: "hadanjazz.kr",
+                snippet: "하단역 일대에서 열리는 도심형 재즈 축제입니다. 국내외 재즈 아티스트, 게스트 세션 정보와 공연 시간표를 미리 만나보세요.",
+                rating: 4.8,
+                reviews: 1023,
+            },
+            {
+                title: "다대포 선셋 포토워크 · 참가자 모집(하단 출발)",
+                url: "https://www.dadaepo-sunset.com/walk",
+                displayUrl: "dadaepo-sunset.com",
+                snippet: "하단에서 출발해 다대포 해변 일몰 명소를 걷는 포토워크입니다. 촬영 포인트, 복장 가이드, 날씨 체크리스트를 참고해보세요.",
+                rating: 4.5,
+                reviews: 392,
+            },
+            {
+                title: "로컬 베이커리 위크 in 하단 · 참가 매장 안내",
+                url: "https://bakeryweek.kr/hadan",
+                displayUrl: "bakeryweek.kr",
+                snippet: "하단의 개성 있는 로컬 베이커리 20여 곳이 참여합니다. 시그니처 메뉴, 빵 굽는 시간, 스탬프 위치와 한정 굿즈 정보를 제공합니다.",
+                rating: 4.6,
+                reviews: 745,
+            },
+        ];
 
-        // 2. 검색 결과 렌더링 함수
-        function renderResults(query) {
-            const resultsList = document.getElementById('resultsList');
-            const resultsCount = document.getElementById('resultsCount');
-            let filteredResults = seedResults;
+        let submittedQuery = "부산외국어대학교 글로컬크리에이터 하단"; // 초기 검색어
 
-            // React useMemo의 필터링 로직을 단순화하여 구현
-            if (query && query.trim()) {
-                const k = query.trim().toLowerCase();
-                const tokens = k.split(' ').filter(t => t.length > 0);
-                if (tokens.length > 0) {
-                    filteredResults = seedResults.filter((r) => {
-                        const title = r.title.toLowerCase();
-                        const snip = r.snippet.toLowerCase();
-                        return tokens.some((t) => title.includes(t) || snip.includes(t));
-                    });
-                    if (filteredResults.length === 0) {
-                        filteredResults = seedResults; // 검색 결과가 없으면 전체 표시 (원본 코드와 동일)
-                    }
-                }
-            }
+        // 2. 검색 결과 렌더링 함수
+        function renderResults(query) {
+            const resultsList = document.getElementById('resultsList');
+            const resultsCount = document.getElementById('resultsCount');
+            let filteredResults = seedResults;
 
-            resultsList.innerHTML = filteredResults.map((r) => `
-                <li class="result-item group">
-                    <div class="result-display-url">${r.displayUrl}</div>
-                    <a href="${r.url}" target="_blank" rel="noreferrer" class="result-title-link">
-                        <div class="result-title">${r.title}</div>
-                    </a>
-                    <div class="result-meta">
-                        <span class="result-rating">★ ${r.rating.toFixed(1)}</span>
-                        <span class="result-reviews">(${r.reviews.toLocaleString()}건의 리뷰)</span>
-                    </div>
-                    <div class="result-snippet">${r.snippet}</div>
-                </li>
-            `).join('');
+            // 검색어에 따른 필터링 로직 (간단화)
+            if (query && query.trim()) {
+                const k = query.trim().toLowerCase();
+                const tokens = k.split(' ').filter(t => t.length > 0);
+                if (tokens.length > 0) {
+                    filteredResults = seedResults.filter((r) => {
+                        const title = r.title.toLowerCase();
+                        const snip = r.snippet.toLowerCase();
+                        return tokens.some((t) => title.includes(t) || snip.includes(t));
+                    });
+                    if (filteredResults.length === 0) {
+                        filteredResults = seedResults; // 검색 결과가 없으면 전체 표시
+                    }
+                }
+            }
 
-            resultsCount.textContent = `약 ${filteredResults.length.toLocaleString()}개 결과`;
-        }
-        
-        // 3. 검색 버튼 이벤트 핸들러
-        function submitSearch() {
-            const inputElement = document.getElementById('searchInput');
-            const newQuery = inputElement.value;
-            submittedQuery = newQuery;
-            renderResults(submittedQuery);
-        }
+            resultsList.innerHTML = filteredResults.map((r) => `
+                <li class="result-item group">
+                    <div class="result-display-url">${r.displayUrl}</div>
+                    <a href="${r.url}" target="_blank" rel="noreferrer" class="result-title-link">
+                        <div class="result-title">${r.title}</div>
+                    </a>
+                    <div class="result-meta">
+                        <span class="result-rating">★ ${r.rating.toFixed(1)}</span>
+                        <span class="result-reviews">(${r.reviews.toLocaleString()}건의 리뷰)</span>
+                    </div>
+                    <div class="result-snippet">${r.snippet}</div>
+                </li>
+            `).join('');
 
-        // 4. 지도 초기화 (Leaflet)
-        function initMap() {
-            const el = document.getElementById("mapPreview");
-            if (!el || typeof L === 'undefined') {
-                // Leaflet이 로드되지 않았거나 요소가 없으면 종료
-                console.log("Leaflet or map element not found. Retrying map init...");
-                // 필요한 경우 재시도 로직 추가 가능
-                return;
-            }
+            resultsCount.textContent = `약 ${filteredResults.length.toLocaleString()}개 결과`;
+        }
+        
+        // 3. 검색 버튼 이벤트 핸들러
+        function submitSearch() {
+            const inputElement = document.getElementById('searchInput');
+            const newQuery = inputElement.value;
+            submittedQuery = newQuery;
+            renderResults(submittedQuery);
+        }
 
-            try {
-                // 지도 생성 및 중심점 설정 (부산외대 하단역 근처 좌표 [35.104, 128.966])
-                const map = L.map(el, { zoomControl: false }).setView([35.104, 128.966], 14);
-                L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-                    attribution: '&copy; OpenStreetMap contributors',
-                }).addTo(map);
-                L.marker([35.104, 128.966]).addTo(map).bindPopup("하단역").openPopup();
-                
-                // 지도 크기가 변경되었을 때 갱신 (레이아웃 로드 후 중요)
-                setTimeout(() => map.invalidateSize(), 100); 
+        // 4. 지도 초기화 (Leaflet)
+        function initMap() {
+            const el = document.getElementById("mapPreview");
+            
+            // Leaflet 객체(L)가 로드되었는지 확인
+            if (!el || typeof L === 'undefined') {
+                console.error("Leaflet 스크립트가 로드되지 않았거나 지도 요소를 찾을 수 없습니다.");
+                return;
+            }
 
-            } catch (err) {
-                console.error("Leaflet init failed:", err);
-            }
-        }
+            try {
+                // 지도 생성 및 중심점 설정 (부산외대 하단역 근처 좌표 [35.104, 128.966])
+                const map = L.map(el, { zoomControl: false }).setView([35.104, 128.966], 14);
+                
+                // 타일 레이어 추가 (지도 배경)
+                L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                    attribution: '&copy; OpenStreetMap contributors',
+                }).addTo(map);
+                
+                // 마커 추가
+                L.marker([35.104, 128.966]).addTo(map).bindPopup("하단역").openPopup();
+                
+                // 지도가 숨겨진 상태에서 초기화될 경우를 대비해 크기 갱신
+                setTimeout(() => map.invalidateSize(), 100); 
 
-        // 5. 초기 로드
-        document.addEventListener('DOMContentLoaded', () => {
-            // 1. 검색 결과 초기 렌더링
-            renderResults(submittedQuery);
-            
-            // 2. Leaflet 스크립트 로드
-            const script = document.createElement("script");
-            script.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
-            script.integrity = "sha256-20n6qqMsLwQ/T+lC4/l+oV/2tV9o9h2S1+t1b9eQ5w4=";
-            script.crossOrigin = "";
-            script.async = true;
-            document.body.appendChild(script);
+            } catch (err) {
+                console.error("Leaflet 지도 초기화 실패:", err);
+            }
+        }
 
-            // 3. 스크립트 로드 완료 후 지도 초기화
-            script.onload = initMap;
-        });
+        // 5. 초기 로드
+        document.addEventListener('DOMContentLoaded', () => {
+            // 1. 검색 결과 초기 렌더링
+            renderResults(submittedQuery);
+            
+            // 2. DOM이 준비된 후 지도 초기화 (Leaflet 스크립트가 body 태그에서 로드될 때까지 기다림)
+            // L 객체가 로드되었는지 확인하고 지연 실행
+            if (typeof L !== 'undefined') {
+                initMap();
+            } else {
+                // L 객체가 아직 정의되지 않은 경우(스크립트 로딩 중), 로드 완료 시점을 기다림
+                window.onload = initMap;
+            }
+        });
 
-    </script>
+    </script>
 </body>
 </html>
