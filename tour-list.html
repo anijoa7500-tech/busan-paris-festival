@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>하단 숙박/체험 로컬 여행 상품 리스트</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* React 컴포넌트에서 필요한 Tailwind 기본 설정 (선택 사항) */
+        /* Tailwind를 사용하므로 추가적인 CSS는 최소화 */
+        body { font-family: sans-serif; }
+    </style>
+</head>
+<body>
+
+    <div id="app" class="min-h-screen bg-sky-100">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <aside class="lg:col-span-4 bg-gradient-to-b from-sky-400 to-sky-300 rounded-3xl p-8 relative overflow-hidden shadow-lg">
+                    <div class="text-white">
+                        <h1 class="text-3xl sm:text-4xl font-extrabold leading-tight">
+                            여행 맛집<br />추천<br />리스트
+                        </h1>
+                        <div class="mt-6 flex items-center gap-3 text-sky-50/90">
+                            <span class="text-xl">🧭</span>
+                            <span class="text-base">하단역·을숙도·다대포 허브</span>
+                        </div>
+                        <div class="mt-8 space-y-3" id="categoryButtons">
+                            </div>
+                        <div class="mt-6">
+                            <label class="block text-white/90 text-sm mb-1">검색</label>
+                            <input
+                                id="searchInput"
+                                oninput="setQ(this.value)"
+                                placeholder="예) 선셋, 크루즈"
+                                class="w-full rounded-xl border-0 px-4 py-3 shadow-inner placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-white"
+                            />
+                        </div>
+                        <div class="absolute -bottom-10 -left-6 w-[140%] opacity-30 select-none pointer-events-none">
+                            <img alt="map-decoration" class="w-full" src="https://images.unsplash.com/photo-1502920917128-1aa500764cbd?q=80&w=1600&auto=format&fit=crop" />
+                        </div>
+                    </div>
+                </aside>
+
+                <main class="lg:col-span-8">
+                    <div id="tourList" class="grid sm:grid-cols-2 xl:grid-cols-2 gap-6 items-stretch">
+                        </div>
+                    <div class="mt-8 rounded-3xl bg-slate-50 p-6 text-slate-700 shadow-inner">
+                        <p class="text-sm">
+                            ※ 모든 상품은 하단역(1호선) 집결 기준입니다. 일정·세부 코스·티켓 문의는 <span class="font-semibold"> saha-tour@busan.go.kr </span>로 연락 주세요.
+                        </p>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // === 데이터 및 상태 ===
+        let q = "";
+        let cat = "ALL";
+        let wish = new Set();
+        
+        const cats = [
+            { key: "ALL", label: "전체" },
+            { key: "따뜻한 휴식", label: "따뜻한 휴식" },
+            { key: "액티비티", label: "액티비티" },
+            { key: "로컬맛집", label: "로컬맛집" },
+            { key: "감성", label: "감성" },
+        ];
+
+        const seed = [
+            { id: "eulsukdo-cruise", kind: "패키지", title: "[K-인싸 바이브 챌린지] 동아대 새내기 룩 & 미션 투어 1일", tags: ["K-인싸바이브", "동아대새내기", "숏폼챌린지"], price: 59000, priceNote: "원~", img: "https://images.weserv.nl/?url=postfiles.pstatic.net/MjAyNTExMTJfMjg3/MDAxNzYyOTEwMzEzNzY3.pGTAwu2rihw9IApPtkC3hBxicZY_12nCaBPehnlGV74g.3591x9xdA4pN5ovnArLT46e-o-bMTQ4KuJtQ7jdAiWAg.PNG/dlsTkqkdlqm.png?type=w580", badge: "", category: "따뜻한 휴식", desc: "부산 하단의 대학가 문화를 정복하고 숏폼 미션 완료! 상권 바우처로 로컬 맛집에서 실속 있게 소비하세요.", },
+            { id: "songdo-seaworld", kind: "패키지", title: "오늘은 내가 1일 비누 크리에이터! - 향기로 물드는 하루", tags: ["1일비누크리에이터", "나만의비누", "향기프로젝트"], price: 39000, priceNote: "원~", img: "https://images.weserv.nl/?url=postfiles.pstatic.net/MjAyNTExMTJfMjIy/MDAxNzYyOTEwNDY3NTY3.SaqNYMu-ca-u2GCU_-cXrGEB7YI7WCy3uv-W-u9XwFUg.m2eGlR_bOlP3pkl26cc6CVqHzCQeH-_APMOr2Gue4y4g.JPEG/unnamed_(2).jpg?type=w580", badge: "", category: "액티비티", desc: "을숙도의 자연색과 하단만의 향기를 담아 나만의 로컬 굿즈(K-Soap)를 제작! 과거 비누 공장의 스토리 위에서 향기로 물드는 특별한 하루를 체험하세요.", },
+            { id: "dadaepo-sunset", kind: "패키지", title: "[하늘에서 만나는 바다] 송도 해수욕장 & 아쿠아리움", tags: ["해수욕장", "케이블카", "아쿠아리움"], price: 69000, priceNote: "원~", img: "https://images.weserv.nl/?url=postfiles.pstatic.net/MjAyNTExMTJfMjkx/MDAxNzYyOTEwNDYzODMx.ckwy-RgaIM8C8vagSJR7gHJSZr9bUuNp9cqIgHSBieEg.DKkjb9rfWw7f1M5p8GGHipq2jXzKaBfoxk5TOR1UIz0g.JPEG/unnamed_(1).jpg?type=w580", badge: "", category: "감성", desc: "대한민국 최초의 해수욕장인 송도 해수욕장에서 바다 위를 걸을 수 있는 스카이워크 및 케이블카 체험을 즐겨보세요.", },
+            { id: "hadan-paris-marche", kind: "패키지", title: "[인생샷 성지] 하단 노을 맛집: 골든아워 포토 투어 1일", tags: ["SunsetInHadan", "BusanGoldenHour", "K-PhotoSpot", "하리단길카페", "낙동강노을"], price: 19000, priceNote: "원~", img: "https://images.weserv.nl/?url=postfiles.pstatic.net/MjAyNTExMTJfMjA5/MDAxNzYyOTEwNDcxOTM1.Kg4g9XnXbl9zo9FTS7ti9V8fdwliZwHCAP1Lb4OFi4Qg.2VdRxMhJM3qo3t3JNKYKKucJaWeYNT3JfVNvon69WDcg.JPEG/unnamed.jpg?type=w580", badge: "#주말한정", category: "로컬맛집", desc: "낙동강 하구에 펼쳐지는 황금빛 노을! 하리단길 감성 카페에서 시그니처 드링크를 마시며, 부산 최고의 골든아워 인생샷을 남겨보세요.", },
+        ];
+
+        // === 헬퍼 함수 ===
+        const fmt = (n) => n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        function iconFor(key) {
+            switch (key) {
+                case "따뜻한 휴식": return "🌤️";
+                case "액티비티": return "🎢";
+                case "로컬맛집": return "🍜";
+                case "감성": return "📸";
+                default: return "✨";
+            }
+        }
+
+        // === 상태 변경 및 렌더링 ===
+        function setCat(newCat) {
+            cat = newCat;
+            renderAll();
+        }
+
+        function setQ(newQ) {
+            q = newQ;
+            renderAll();
+        }
+
+        function toggleWish(id) {
+            wish.has(id) ? wish.delete(id) : wish.add(id);
+            renderAll();
+        }
+
+        function getFiltered() {
+            return seed.filter((it) => {
+                const hitCat = cat === "ALL" || it.category === cat;
+                const key = q.trim().toLowerCase();
+                const hitQ = !key || it.title.toLowerCase().includes(key) || it.tags.join(" ").toLowerCase().includes(key);
+                return hitCat && hitQ;
+            });
+        }
+
+        function renderAll() {
+            renderCategoryButtons();
+            renderTourList();
+        }
+
+        function renderCategoryButtons() {
+            const buttonsHtml = cats.map((c) => `
+                <button
+                    onclick="setCat('${c.key}')"
+                    class="w-full flex items-center gap-3 rounded-full px-4 py-3 text-left bg-white/90 hover:bg-white shadow-md transition ${cat === c.key ? "ring-2 ring-white" : ""}"
+                >
+                    <span>${iconFor(c.key)}</span>
+                    <span class="font-semibold text-slate-800">${c.label}</span>
+                </button>
+            `).join('');
+            document.getElementById('categoryButtons').innerHTML = buttonsHtml;
+            document.getElementById('searchInput').value = q;
+        }
+
+        function renderTourList() {
+            const filtered = getFiltered();
+            const listHtml = filtered.map((item) => `
+                <article key="${item.id}" class="h-full bg-white rounded-3xl overflow-hidden shadow hover:shadow-xl transition group flex flex-col">
+                    <div class="relative">
+                        <img
+                            src="${item.img}"
+                            alt="${item.title}"
+                            class="h-56 w-full object-cover group-hover:scale-[1.02] transition"
+                            loading="lazy"
+                            onerror="
+                                const orig = '${item.img.replace(/'/g, "\\'")}}';
+                                const prox = 'https://images.weserv.nl/?url=' + encodeURIComponent(orig.replace(/^https?:\/\//, ''));
+                                if (this.src !== prox) {
+                                    this.src = prox;
+                                }
+                            "
+                        />
+                        <button onclick="toggleWish('${item.id}')" class="absolute top-3 right-3 bg-white/90 rounded-full px-3 py-1 text-sm shadow" aria-label="즐겨찾기">
+                            ${wish.has(item.id) ? "❤️" : "🤍"}
+                        </button>
+                    </div>
+                    <div class="p-5 flex-1 flex flex-col">
+                        <p class="text-xs text-slate-500">${item.kind}</p>
+                        <h3 class="mt-1 text-lg font-bold text-slate-900">${item.title}</h3>
+                        <div class="min-h-[18px] mt-1">
+                            ${item.badge ? `<p class="text-xs text-sky-600 font-medium">${item.badge}</p>` : ''}
+                        </div>
+                        <div class="mt-3 flex flex-wrap gap-2 min-h-[28px]">
+                            ${item.tags && item.tags.length > 0 ? item.tags.map((t) => `<span class="text-[11px] px-2 py-1 rounded-full bg-slate-100 text-slate-600">#${t}</span>`).join('') : `<span class="text-[11px] opacity-0">#placeholder</span>`}
+                        </div>
+                        <p class="mt-3 text-sm text-slate-600 leading-relaxed">${item.desc || " "}</p>
+                        <div class="mt-auto pt-4 flex items-end justify-between">
+                            <div>
+                                <div class="text-2xl font-extrabold tracking-tight">
+                                    ${fmt(item.price)} <span class="text-base font-semibold">${item.priceNote}</span>
+                                </div>
+                            </div>
+                            <a href="#" class="inline-flex items-center gap-2 rounded-xl px-4 py-2 bg-sky-600 text-white hover:bg-sky-700">
+                                자세히 보기 <span>↗</span>
+                            </a>
+                        </div>
+                    </div>
+                </article>
+            `).join('');
+            document.getElementById('tourList').innerHTML = listHtml;
+        }
+
+        // === 초기 실행 ===
+        document.addEventListener('DOMContentLoaded', () => {
+            renderAll();
+        });
+    </script>
+
+</body>
+</html>
