@@ -6,12 +6,13 @@
     <title>부산외국어대학교 글로컬크리에이터 하단 | Google Search Clone</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        /* 기본 스타일 및 초기화 */
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100..900&display=swap');
         body {
             font-family: 'Noto Sans KR', sans-serif;
             background-color: #202124;
             color: #e8eaed;
-            /* 스크롤바 숨김 */
+            /* 스크롤바 숨김 (다크 모드에서 스크롤바가 흰색으로 보일 수 있어 숨김) */
             -ms-overflow-style: none; scrollbar-width: none;
         }
         body::-webkit-scrollbar { display: none; }
@@ -22,12 +23,18 @@
         .bg-search-bar { background-color: #303134; }
         
         /* Leaflet CSS for Map Preview */
+        /* Leaflet CSS는 필수로 포함해야 합니다. */
         @import url('https://unpkg.com/leaflet@1.9.4/dist/leaflet.css');
         
         /* Map container should have specific dimensions */
         #mapPreview {
             width: 100%;
             height: 100%;
+        }
+
+        /* Leaflet Map이 배경색을 완전히 덮도록 설정 (옵션: 테두리 없이) */
+        #mapPreview .leaflet-container {
+            background-color: #1f2023; /* 배경색 통일 */
         }
     </style>
 </head>
@@ -186,6 +193,7 @@
     </footer>
 </div>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
     // Leaflet 아이콘 경로 명시적 설정 (404 오류 해결)
     if (window.L && L.Icon && L.Icon.Default) {
@@ -195,9 +203,7 @@
             shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png'
         });
     }
-</script>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script>
+
     const seedResults = [
         {
             title: "[부산한정] NFC 비누비누 베이베 키링 · GLOCAL:HD",
@@ -268,13 +274,13 @@
         `).join('');
     }
 
-    // Leaflet Map Initialization
     let mapInstance = null;
     function initializeMap() {
         const L = window.L;
         const el = document.getElementById("mapPreview");
         
         if (!L || !el) {
+            // Leaflet 라이브러리가 로드되지 않았다면 잠시 후 다시 시도
             setTimeout(initializeMap, 100); 
             return;
         }
@@ -285,18 +291,26 @@
                 mapInstance = null;
             }
 
-            mapInstance = L.map(el, { zoomControl: false }).setView([35.104, 128.966], 14);
+            // 지도 초기화 (하단역 근처 좌표)
+            mapInstance = L.map(el, { 
+                zoomControl: false, 
+                scrollWheelZoom: false // 스크롤 방지 
+            }).setView([35.104, 128.966], 14);
             
-            // 지도 크기 오류 해결: 지도가 준비되었을 때 크기를 무효화
+            // **[수정] 다크 모드에 더 잘 어울리는 CartoDB Dark Matter 타일 적용**
+            L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+                subdomains: 'abcd',
+                maxZoom: 19
+            }).addTo(mapInstance);
+            
+            // 마커 추가
+            L.marker([35.104, 128.966]).addTo(mapInstance).bindPopup("하단역").openPopup();
+            
+            // **[개선] 지도가 완전히 준비되었을 때 크기를 재계산하여 레이아웃 문제 해결**
             mapInstance.whenReady(function() {
                 this.invalidateSize();
             });
-
-            L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-                attribution: '&copy; OpenStreetMap contributors',
-            }).addTo(mapInstance);
-            L.marker([35.104, 128.966]).addTo(mapInstance).bindPopup("하단역").openPopup();
-            
 
         } catch (err) {
             console.error("Leaflet map initialization failed:", err);
@@ -308,7 +322,13 @@
         initializeMap();
     });
 
+    // 안전을 위해 window load 시점에도 다시 시도
     window.addEventListener('load', initializeMap);
+    window.addEventListener('resize', () => {
+        if (mapInstance) {
+            mapInstance.invalidateSize();
+        }
+    });
 </script>
 
 </body>
