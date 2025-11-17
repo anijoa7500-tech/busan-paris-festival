@@ -235,10 +235,14 @@
     let mapInstance = null;
     let mapInitialized = false;
 
+    /**
+     * 지도 초기화 함수: Leaflet의 크기 계산 오류를 방지하기 위한 안정화 로직 포함
+     */
     function initializeMap() {
         const L = window.L;
         const el = document.getElementById("mapPreview");
         
+        // 1. 필요한 라이브러리/요소 검사 및 중복 초기화 방지
         if (!L || !el || mapInitialized) {
             return;
         }
@@ -246,37 +250,42 @@
         try {
             mapInitialized = true;
             
-            if (mapInstance) { mapInstance.remove(); }
+            if (mapInstance) { 
+                mapInstance.remove(); 
+                mapInstance = null;
+            }
 
-            // 지도 초기화 (하단역 근처 좌표)
+            // 2. 지도 초기화 (하단역 근처 좌표 및 확대 레벨 조정)
             mapInstance = L.map(el, { 
                 zoomControl: false, 
                 scrollWheelZoom: false 
-            }).setView([35.104, 128.966], 14);
-            
-            // CartoDB Positron 타일셋 적용 (회색 톤, Google Maps 유사 스타일)
+            }).setView([35.104, 128.966], 15); // 줌 레벨을 15로 조정하여 좀 더 확대
+
+            // 3. CartoDB Positron 타일셋 적용 (회색 톤 스타일)
             L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+                attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery &copy; <a href="https://carto.com/attributions">CARTO</a>',
                 subdomains: 'abcd',
                 maxZoom: 20
             }).addTo(mapInstance);
             
-            // 마커 추가
+            // 4. 마커 추가
             L.marker([35.104, 128.966]).addTo(mapInstance).bindPopup("하단역").openPopup();
             
-            // 지도 크기 재계산 로직으로 타일 깨짐 방지
+            // 5. ⭐️ 핵심 안정화 로직: DOM 렌더링 후 크기 재계산 (가장 중요) ⭐️
             mapInstance.whenReady(function() {
-                this.invalidateSize(); 
+                // 초기 로드 시 한 번 호출
+                this.invalidateSize(true); 
 
-                // DOM 렌더링을 위해 약간의 시간(10ms)을 준 후 재계산 (타일 누락 방지)
+                // DOM이 완전히 안정화되도록 200ms 후 다시 호출 
+                // 이 지연이 없으면 지도 크기가 잘못 계산되어 깨질 수 있습니다.
                 setTimeout(() => {
-                    this.invalidateSize();
-                }, 10);
+                    this.invalidateSize(true); 
+                }, 200);
                 
-                // resize 이벤트 핸들러 등록
+                // 윈도우 크기 변경 시에도 크기 재계산
                 window.addEventListener('resize', () => {
                     if (mapInstance) {
-                        mapInstance.invalidateSize();
+                        mapInstance.invalidateSize(false);
                     }
                 });
             });
