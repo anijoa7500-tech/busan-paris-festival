@@ -41,17 +41,6 @@
         .leaflet-control-attribution {
             display: none !important;
         }
-        /* 검색 결과 목록이 2단 그리드가 될 때, 세로 줄을 깔끔하게 제거 */
-        #resultsList li:nth-child(odd) {
-             border-right: 1px solid rgba(255, 255, 255, 0.1);
-             padding-right: 2rem; /* gap-x-8과 동일하게 맞춤 */
-        }
-        @media (max-width: 767px) { /* md:grid-cols-2보다 작을 때 */
-            #resultsList li:nth-child(odd) {
-                 border-right: none;
-                 padding-right: 0;
-            }
-        }
     </style>
 </head>
 <body>
@@ -177,8 +166,8 @@
 
         <section>
             <p class="text-sm text-[#9aa0a6] mb-3">약 6개 결과</p>
-            <ul id="resultsList" class="space-y-6 grid grid-cols-1 md:grid-cols-2 gap-x-8">
-            </ul>
+            <ul id="resultsList" class="space-y-6">
+                </ul>
         </section>
 
         <aside class="hidden lg:block lg:sticky lg:top-[76px] h-fit">
@@ -233,25 +222,19 @@
         const list = document.getElementById('resultsList');
         if (!list) return;
         
-        // 검색 결과 목록을 렌더링할 때, 2단 그리드에 맞게 아이템별로 마진과 패딩을 조정합니다.
-        list.innerHTML = results.map((r, index) => {
-             // 홀수 번째 아이템 (1, 3, 5...)은 오른쪽에 경계선을 추가합니다.
-            const itemClasses = index % 2 === 0 && window.innerWidth >= 768 ? 'border-b border-white/10 pb-4' : 'border-b border-white/10 pb-4';
-
-            return `
-                <li class="group ${itemClasses}">
-                    <div class="text-xs text-[#9aa0a6] mb-1">${r.displayUrl}</div>
-                    <a href="${r.url}" target="${r.url.startsWith('http') ? '_blank' : '_self'}" rel="noreferrer" class="block">
-                        <div class="text-lg md:text-xl leading-snug text-google-blue group-hover:underline">${r.title}</div>
-                    </a>
-                    <div class="mt-1 flex items-center gap-2 text-sm text-[#e8eaed]">
-                        <span class="font-semibold text-google-yellow">★ ${r.rating}</span>
-                        <span class="text-[#9aa0a6]">(${r.reviews.toLocaleString()}건의 리뷰)</span>
-                    </div>
-                    <div class="mt-1 text-[#bdc1c6] leading-relaxed">${r.snippet}</div>
-                </li>
-            `;
-        }).join('');
+        list.innerHTML = results.map(r => `
+            <li class="group border-b border-white/10 pb-4">
+                <div class="text-xs text-[#9aa0a6] mb-1">${r.displayUrl}</div>
+                <a href="${r.url}" target="${r.url.startsWith('http') ? '_blank' : '_self'}" rel="noreferrer" class="block">
+                    <div class="text-lg md:text-xl leading-snug text-google-blue group-hover:underline">${r.title}</div>
+                </a>
+                <div class="mt-1 flex items-center gap-2 text-sm text-[#e8eaed]">
+                    <span class="font-semibold text-google-yellow">★ ${r.rating}</span>
+                    <span class="text-[#9aa0a6]">(${r.reviews.toLocaleString()}건의 리뷰)</span>
+                </div>
+                <div class="mt-1 text-[#bdc1c6] leading-relaxed">${r.snippet}</div>
+            </li>
+        `).join('');
     }
 
     let mapInstance = null;
