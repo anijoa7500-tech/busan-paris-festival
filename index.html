@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>부산외국어대학교 글로컬크리에이터 하단 | Google Search Clone</title>
     
-    <script src="https://cdn.tailwindcss.com"></script>
+        <script src="https://cdn.tailwindcss.com"></script>
 
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     
     <style>
         /* 기본 스타일 및 초기화 */
@@ -88,7 +88,7 @@
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M10 16.5l6-4.5-6-4.5v9zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
                 <span>동영상</span>
             </a>
-            <a href="#" class="flex items-center gap-1 py-2 hover:text-white">
+            <a href="#" id="tab-map" onclick="changeTab('map')" class="tab-item flex items-center gap-1 py-2 hover:text-white">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zM7 9c0-2.76 2.24-5 5-5s5 2.24 5 5c0 2.88-2.88 7.19-5 9.88C9.88 16.19 7 11.88 7 9z"/></svg>
                 <span>지도</span>
             </a>
@@ -152,7 +152,7 @@
                 <div class="rounded-2xl border border-white/10 bg-search-bar p-4 text-[#bdc1c6] leading-relaxed">
                     <div class="text-[#e8eaed] font-semibold mb-2">기본현황</div>
                     부산 하단동이 단순히 경유지가 아닌, 외국인 관광객이 '머물고, 소비하고 싶은' 목적지가 되기 위한 글로컬 크리에이터의 핵심 전략은 하단이 가진 독특한 자원을 '환승 시간'에 맞춘 매력적인 체험으로 바꾸는 것입니다.
-                </div>
+            </div>
                 <div class="rounded-2xl border border-white/10 bg-search-bar p-4 text-sm text-[#e8eaed]">
                     <div class="text-[#e8eaed] font-semibold mb-2">하단 지역 핵심지표</div>
                     <dl class="grid grid-cols-[120px_minmax(0,1fr)] gap-y-2">
@@ -234,7 +234,7 @@
         { url: "https://anijoa7500-tech.github.io/busan-paris-festival/images/image-8.jpg", caption: "부산 서부 버스터미널 모습", source: "교통정보센터" },
     ];
     
-    // ⭐️ 동영상 검색 결과 데이터 (새로 추가) ⭐️
+    // 동영상 검색 결과 데이터
     const videoResults = [
         {
             title: "하단: 낙동강 하구의 숨겨진 보석 | 글로컬크리에이터 탐방",
@@ -275,7 +275,7 @@
     // 2. 렌더링 함수 (Rendering Functions)
     // ===============================
     
-    // 일반 검색 결과를 렌더링하는 함수
+    // 일반 검색 결과를 렌더링하는 함수 (전체 탭)
     function renderResults(results) {
         const list = document.getElementById('resultsList');
         const countElement = document.getElementById('result-count');
@@ -300,7 +300,7 @@
         `).join('');
     }
 
-    // 이미지 갤러리 검색 결과를 렌더링하는 함수
+    // 이미지 갤러리 검색 결과를 렌더링하는 함수 (이미지 탭)
     function renderImageGallery(images) {
         const list = document.getElementById('resultsList');
         const countElement = document.getElementById('result-count');
@@ -329,7 +329,7 @@
         `).join('');
     }
 
-    // ⭐️ 동영상 검색 결과를 렌더링하는 함수 (새로 추가) ⭐️
+    // 동영상 검색 결과를 렌더링하는 함수 (동영상 탭)
     function renderVideoResults(results) {
         const list = document.getElementById('resultsList');
         const countElement = document.getElementById('result-count');
@@ -364,6 +364,30 @@
         `).join('');
     }
 
+    // 지도 탭이 활성화될 때 검색 결과를 대체하는 함수
+    function renderMapTab() {
+        const resultsSection = document.getElementById('results-section');
+        const countElement = document.getElementById('result-count');
+        const list = document.getElementById('resultsList');
+
+        // 지도 탭에서는 일반 검색 결과를 표시하지 않고 지도만 중앙에 표시
+        countElement.textContent = ``;
+        list.innerHTML = `
+            <div class="p-4 text-[#bdc1c6] text-center">
+                지도는 상단 요약 영역에서 볼 수 있습니다. (데모 페이지)
+                <div class="mt-2 text-google-blue cursor-pointer" onclick="changeTab('all')">
+                    [전체] 탭에서 지도 보기
+                </div>
+            </div>
+        `;
+
+        // 지도가 보이도록 상단 요약 섹션 활성화
+        const summarySection = document.getElementById('summary-section');
+        summarySection.style.display = 'block';
+        resultsSection.classList.add('lg:col-span-1');
+        resultsSection.classList.remove('col-span-full');
+    }
+
     // ===============================
     // 3. 탭 전환 로직 (Tab Switching Logic)
     // ===============================
@@ -389,9 +413,10 @@
         const summarySection = document.getElementById('summary-section');
         const resultsSection = document.getElementById('results-section');
         
+        summarySection.style.display = 'none'; // 기본적으로 상단 요약 섹션 숨김
+
         if (tabName === 'all') {
             // '전체' 탭: 상단 요약/지도 표시, 일반 검색 결과 표시
-            summarySection.classList.add('col-span-full');
             summarySection.style.display = 'block';
             resultsSection.classList.add('lg:col-span-1');
             resultsSection.classList.remove('col-span-full');
@@ -399,24 +424,19 @@
 
         } else if (tabName === 'image') {
             // '이미지' 탭: 상단 요약/지도 숨김, 이미지 갤러리 표시
-            summarySection.style.display = 'none'; // 상단 요약 섹션 숨김
             resultsSection.classList.remove('lg:col-span-1');
-            resultsSection.classList.add('col-span-full'); // 검색 결과 영역을 전체 너비로 확장
+            resultsSection.classList.add('col-span-full');
             renderImageGallery(imageResults);
 
         } else if (tabName === 'video') {
-            // ⭐️ '동영상' 탭: 상단 요약/지도 숨김, 동영상 결과 표시 ⭐️
-            summarySection.style.display = 'none'; // 상단 요약 섹션 숨김
+            // '동영상' 탭: 상단 요약/지도 숨김, 동영상 결과 표시
             resultsSection.classList.remove('lg:col-span-1');
-            resultsSection.classList.add('col-span-full'); // 검색 결과 영역을 전체 너비로 확장
+            resultsSection.classList.add('col-span-full');
             renderVideoResults(videoResults);
 
-        } else {
-            // 기타 탭 (기본값)
-            summarySection.style.display = 'block';
-            resultsSection.classList.add('lg:col-span-1');
-            resultsSection.classList.remove('col-span-full');
-            renderResults(seedResults);
+        } else if (tabName === 'map') {
+            // '지도' 탭: 상단 요약/지도 표시, 검색 결과 영역에 안내 메시지 표시
+            renderMapTab();
         }
 
         currentTab = tabName;
@@ -437,7 +457,8 @@
 
     function forceMapInvalidate() {
         if (mapInstance && mapInitialized) {
-            mapInstance.invalidateSize(true);
+            // 지도 크기 변경 감지 후 지도를 다시 그리도록 강제
+            mapInstance.invalidateSize(true); 
         }
     }
 
@@ -463,22 +484,20 @@
                 scrollWheelZoom: false 
             }).setView([35.104, 128.966], 15);
 
-            // 2. 🛰️ Esri WorldImagery 타일셋 적용 (고화질 위성 사진 기반 디테일 극대화)
+            // 2. 타일셋 적용 (Esri WorldImagery)
             L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
-                // ⭐️ 어트리뷰션 (저작권 문구)을 빈 문자열로 설정하여 제거 ⭐️
                 attribution: '', 
                 maxZoom: 19,
                 detectRetina: true
             }).addTo(mapInstance);
             
-            // 3. 마커 추가 및 팝업 내용 디테일 추가
+            // 3. 마커 추가
             L.marker([35.104, 128.966])
                 .addTo(mapInstance)
                 .bindPopup("<b>글로컬크리에이터 하단팀 거점</b><br>하단역 5번 출구 부근")
                 .openPopup();
             
-            
-            // 4. ⭐️ 최종 안정화 로직 유지 ⭐️
+            // 4. 레이아웃 변경 감지 시 지도 크기 재조정
             mapInstance.whenReady(function() {
                 this.invalidateSize(true); 
                 setTimeout(forceMapInvalidate, 500); 
@@ -487,7 +506,7 @@
 
             mapContainerObserver = new MutationObserver((mutations) => {
                 mutations.forEach((mutation) => {
-                    if (mutation.type === 'attributes' || mutation.type === 'childList') {
+                    if (mutation.type === 'attributes' || mutation.type === 'childlist') {
                         forceMapInvalidate();
                     }
                 });
